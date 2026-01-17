@@ -1,0 +1,785 @@
+"use client"
+
+import { useState, useMemo } from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+
+import { Sparkles, RefreshCw, ImageIcon, Coins, Download, Shuffle, History, Heart, Star } from "lucide-react"
+import { useWallet } from "@/components/providers/wallet-provider"
+
+const zodiacYears = [
+  { value: "rat", label: "🐀 鼠年", emoji: "🐀" },
+  { value: "ox", label: "🐂 牛年", emoji: "🐂" },
+  { value: "tiger", label: "🐅 虎年", emoji: "🐅" },
+  { value: "rabbit", label: "🐇 兔年", emoji: "🐇" },
+  { value: "dragon", label: "🐉 龙年", emoji: "🐉" },
+  { value: "snake", label: "🐍 蛇年", emoji: "🐍" },
+  { value: "horse", label: "🐎 马年", emoji: "🐎" },
+  { value: "goat", label: "🐐 羊年", emoji: "🐐" },
+  { value: "monkey", label: "🐒 猴年", emoji: "🐒" },
+  { value: "rooster", label: "🐓 鸡年", emoji: "🐓" },
+  { value: "dog", label: "🐕 狗年", emoji: "🐕" },
+  { value: "pig", label: "🐖 猪年", emoji: "🐖" },
+]
+
+const wordCounts = [
+  { value: "5", label: "五言", icon: "5️⃣" },
+  { value: "7", label: "七言", icon: "7️⃣" },
+  { value: "9", label: "九言", icon: "9️⃣" },
+]
+
+const styles = [
+  { value: "traditional", label: "传统典雅", icon: "🏛️", desc: "古风韵味，庄重大气" },
+  { value: "modern", label: "现代简约", icon: "✨", desc: "时尚前沿，清新明快" },
+  { value: "humorous", label: "幽默搞笑", icon: "😄", desc: "诙谐有趣，欢乐满满" },
+  { value: "literary", label: "文艺清新", icon: "🌸", desc: "诗意盎然，唯美雅致" },
+]
+
+const themes = [
+  { value: "career", label: "事业顺利", icon: "💼" },
+  { value: "wealth", label: "财源广进", icon: "💰" },
+  { value: "health", label: "健康长寿", icon: "💪" },
+  { value: "study", label: "学业有成", icon: "📚" },
+  { value: "love", label: "爱情美满", icon: "💕" },
+  { value: "family", label: "阖家幸福", icon: "👨‍👩‍👧‍👦" },
+  { value: "peace", label: "平安顺遂", icon: "🕊️" },
+  { value: "general", label: "万事如意", icon: "🎊" },
+]
+
+const tones = [
+  { value: "solemn", label: "庄重", icon: "🎩", color: "from-slate-500 to-slate-700" },
+  { value: "lively", label: "活泼", icon: "🎉", color: "from-orange-400 to-pink-500" },
+  { value: "warm", label: "温馨", icon: "🌸", color: "from-rose-400 to-amber-400" },
+  { value: "bold", label: "霸气", icon: "🔥", color: "from-red-500 to-orange-600" },
+]
+
+const mockCouplets: Record<string, { upper: string; lower: string; horizontal: string }> = {
+  "traditional-career-5": {
+    upper: "鹏程万里展",
+    lower: "骏业千秋兴",
+    horizontal: "前程似锦",
+  },
+  "traditional-career-7": {
+    upper: "龙腾虎跃鹏程远",
+    lower: "凤舞莺歌骏业新",
+    horizontal: "宏图大展",
+  },
+  "traditional-wealth-7": {
+    upper: "财源滚滚达三江",
+    lower: "生意兴隆通四海",
+    horizontal: "招财进宝",
+  },
+  "modern-general-7": {
+    upper: "新年新气象万里",
+    lower: "好运好前程千秋",
+    horizontal: "万象更新",
+  },
+  "humorous-general-7": {
+    upper: "钱多事少离家近",
+    lower: "位高权重责任轻",
+    horizontal: "心想事成",
+  },
+  default: {
+    upper: "春回大地千山秀",
+    lower: "日暖神州万物荣",
+    horizontal: "春满人间",
+  },
+}
+
+export default function CreatePage() {
+  const { isConnected, connect, isConnecting } = useWallet()
+
+  const [zodiac, setZodiac] = useState("snake")
+  const [wordCount, setWordCount] = useState("7")
+  const [style, setStyle] = useState("traditional")
+  const [theme, setTheme] = useState("general")
+  const [tone, setTone] = useState("lively")
+  const [acrosticName, setAcrosticName] = useState("")
+  const [isAcrostic, setIsAcrostic] = useState(false)
+  const [showAdvanced, setShowAdvanced] = useState(false)
+  const [isFavorite, setIsFavorite] = useState(false)
+
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false)
+  const [isMinting, setIsMinting] = useState(false)
+
+  // 配置预览摘要
+  const configSummary = useMemo(() => {
+    const zodiacItem = zodiacYears.find(z => z.value === zodiac)
+    const styleItem = styles.find(s => s.value === style)
+    const themeItem = themes.find(t => t.value === theme)
+    const toneItem = tones.find(t => t.value === tone)
+    const wordItem = wordCounts.find(w => w.value === wordCount)
+    return {
+      zodiac: zodiacItem,
+      style: styleItem,
+      theme: themeItem,
+      tone: toneItem,
+      wordCount: wordItem,
+    }
+  }, [zodiac, style, theme, tone, wordCount])
+
+  // 随机配置
+  const randomizeConfig = () => {
+    const randomStyle = styles[Math.floor(Math.random() * styles.length)].value
+    const randomTheme = themes[Math.floor(Math.random() * themes.length)].value
+    const randomTone = tones[Math.floor(Math.random() * tones.length)].value
+    const randomWord = wordCounts[Math.floor(Math.random() * wordCounts.length)].value
+    setStyle(randomStyle)
+    setTheme(randomTheme)
+    setTone(randomTone)
+    setWordCount(randomWord)
+  }
+
+  const [couplet, setCouplet] = useState<{
+    upper: string
+    lower: string
+    horizontal: string
+  } | null>(null)
+
+  const [generatedImage, setGeneratedImage] = useState<string | null>(null)
+  const [mintedNFT, setMintedNFT] = useState<{ tokenId: string; txHash: string } | null>(null)
+
+  const generateCouplet = async () => {
+    setIsGenerating(true)
+    setCouplet(null)
+    setGeneratedImage(null)
+    setMintedNFT(null)
+
+    await new Promise((resolve) => setTimeout(resolve, 2000))
+
+    const key = `${style}-${theme}-${wordCount}`
+    let result = mockCouplets[key] || mockCouplets["default"]
+
+    if (isAcrostic && acrosticName.length >= 2) {
+      const chars = acrosticName.split("")
+      result = {
+        upper: chars[0] + result.upper.slice(1),
+        lower: chars[1] ? chars[1] + result.lower.slice(1) : result.lower,
+        horizontal: result.horizontal,
+      }
+    }
+
+    setCouplet(result)
+    setIsGenerating(false)
+  }
+
+  const generateImage = async () => {
+    if (!couplet) return
+    setIsGeneratingImage(true)
+
+    await new Promise((resolve) => setTimeout(resolve, 3000))
+    setGeneratedImage("/chinese-new-year-blessing-couplet-red-gold-traditi.jpg")
+    setIsGeneratingImage(false)
+  }
+
+  const mintNFT = async () => {
+    if (!generatedImage) return
+    setIsMinting(true)
+
+    await new Promise((resolve) => setTimeout(resolve, 2500))
+    setMintedNFT({
+      tokenId: Math.floor(Math.random() * 10000).toString(),
+      txHash: "0x" + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join(""),
+    })
+    setIsMinting(false)
+  }
+
+  const resetAll = () => {
+    setCouplet(null)
+    setGeneratedImage(null)
+    setMintedNFT(null)
+  }
+
+  if (!isConnected) {
+    return (
+      <main className="min-h-screen flex items-center justify-center py-20 pt-24">
+        <Card className="max-w-md w-full mx-4 text-center">
+          <CardContent className="pt-12 pb-8">
+            <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+              <span className="text-4xl">🔗</span>
+            </div>
+            <h3 className="text-xl font-semibold mb-2">请先连接钱包</h3>
+            <p className="text-muted-foreground mb-6">连接钱包后即可开始创作您的专属春联</p>
+            <Button onClick={connect} disabled={isConnecting} className="gap-2">
+              {isConnecting ? (
+                <>
+                  <Sparkles className="h-4 w-4 animate-spin" />
+                  连接中...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4" />
+                  连接钱包
+                </>
+              )}
+            </Button>
+          </CardContent>
+        </Card>
+      </main>
+    )
+  }
+
+  return (
+    <main className="min-h-screen py-8 pt-24 relative overflow-hidden">
+      {/* 背景装饰 - 漂浮的春节元素 */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-20 left-10 text-4xl animate-bounce opacity-20" style={{ animationDuration: '3s' }}>🧧</div>
+        <div className="absolute top-40 right-20 text-3xl animate-bounce opacity-20" style={{ animationDuration: '2.5s', animationDelay: '0.5s' }}>🏮</div>
+        <div className="absolute bottom-40 left-20 text-3xl animate-bounce opacity-20" style={{ animationDuration: '3.5s', animationDelay: '1s' }}>🎆</div>
+        <div className="absolute bottom-20 right-10 text-4xl animate-bounce opacity-20" style={{ animationDuration: '2.8s', animationDelay: '0.3s' }}>🎊</div>
+        <div className="absolute top-1/2 left-5 text-2xl animate-pulse opacity-10" style={{ animationDuration: '2s' }}>✨</div>
+        <div className="absolute top-1/3 right-5 text-2xl animate-pulse opacity-10" style={{ animationDuration: '2.2s' }}>✨</div>
+      </div>
+
+      <div className="container mx-auto px-4 relative z-10">
+        {/* 页面标题 - 更喜庆 */}
+        <div className="mb-8 text-center">
+          <div className="inline-flex items-center gap-3 mb-2">
+            <span className="text-3xl animate-bounce" style={{ animationDuration: '1s' }}>🏮</span>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-red-500 via-amber-500 to-red-500 bg-clip-text text-transparent bg-[length:200%_auto] animate-shimmer">
+              创作中心
+            </h1>
+            <span className="text-3xl animate-bounce" style={{ animationDuration: '1s', animationDelay: '0.5s' }}>🏮</span>
+          </div>
+          <p className="text-muted-foreground flex items-center justify-center gap-2">
+            <span className="text-lg">✨</span>
+            定制您的专属春联，AI为您智能生成
+            <span className="text-lg">✨</span>
+          </p>
+        </div>
+
+        <div className="grid lg:grid-cols-5 gap-6">
+          {/* 左侧：配置面板 */}
+          <Card className="lg:col-span-1 relative overflow-hidden border-0 bg-gradient-to-br from-red-50 via-amber-50/50 to-red-50 dark:from-red-950/30 dark:via-amber-950/20 dark:to-red-950/30">
+            {/* 可爱喜庆边框 - 多层装饰 */}
+            <div className="absolute inset-0 rounded-xl border-4 border-red-500/40 pointer-events-none" />
+            <div className="absolute inset-1 rounded-lg border-2 border-dashed border-amber-400/60 pointer-events-none" />
+            <div className="absolute inset-2 rounded-md border border-red-400/30 pointer-events-none" />
+            
+            {/* 角落装饰 - 中国结风格 */}
+            <div className="absolute -top-1 -left-1 w-8 h-8 bg-gradient-to-br from-red-500 to-amber-500 rounded-br-2xl flex items-center justify-center shadow-lg">
+              <span className="text-white text-xs">福</span>
+            </div>
+            <div className="absolute -top-1 -right-1 w-8 h-8 bg-gradient-to-bl from-red-500 to-amber-500 rounded-bl-2xl flex items-center justify-center shadow-lg">
+              <span className="text-white text-xs">喜</span>
+            </div>
+            <div className="absolute -bottom-1 -left-1 w-8 h-8 bg-gradient-to-tr from-red-500 to-amber-500 rounded-tr-2xl flex items-center justify-center shadow-lg">
+              <span className="text-white text-xs">吉</span>
+            </div>
+            <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-gradient-to-tl from-red-500 to-amber-500 rounded-tl-2xl flex items-center justify-center shadow-lg">
+              <span className="text-white text-xs">祥</span>
+            </div>
+            
+            {/* 顶部灯笼装饰 */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 flex gap-6">
+              <div className="w-3 h-5 bg-gradient-to-b from-red-500 to-red-600 rounded-full shadow-md shadow-red-500/50" />
+              <div className="w-3 h-5 bg-gradient-to-b from-red-500 to-red-600 rounded-full shadow-md shadow-red-500/50" />
+            </div>
+            
+            <CardHeader className="pb-3 border-b border-red-300/40 dark:border-red-500/20 mt-2">
+              <CardTitle className="flex flex-col items-center gap-1 text-lg">
+                <span className="bg-gradient-to-r from-red-500 via-amber-500 to-red-500 bg-clip-text text-transparent font-bold text-2xl">
+                  春联配置
+                </span>
+                <p className="text-xs text-muted-foreground">定制您的专属祝福</p>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 pt-4 px-4">
+              {/* 随机灵感按钮 - 置顶显示 */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={randomizeConfig}
+                className="w-full h-10 text-sm gap-2 border-2 border-dashed border-amber-500/50 hover:bg-gradient-to-r hover:from-amber-500/10 hover:to-red-500/10 hover:border-amber-500 bg-gradient-to-r from-amber-50/50 to-red-50/50 dark:from-amber-950/30 dark:to-red-950/30 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+              >
+                <Shuffle className="w-4 h-4 text-amber-500" />
+                <span className="font-bold bg-gradient-to-r from-amber-600 to-red-600 bg-clip-text text-transparent">随机灵感</span>
+                <span className="text-xs text-muted-foreground">一键生成创意配置</span>
+              </Button>
+
+              {/* 分隔线 */}
+              <div className="flex items-center gap-2">
+                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-red-300/50 to-transparent" />
+                <span className="text-[10px] text-muted-foreground">自定义配置</span>
+                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-red-300/50 to-transparent" />
+              </div>
+
+              {/* 基础设置 */}
+              <div className="space-y-3">
+                {/* 生肖年份 & 字数 - 并排 */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-bold flex items-center gap-1 text-foreground">
+                      <span className="text-sm">🐲</span>
+                      生肖
+                    </Label>
+                    <Select value={zodiac} onValueChange={setZodiac}>
+                      <SelectTrigger className="h-9 bg-background/80 border-2 border-red-500/20 hover:border-red-500/40 rounded-lg text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {zodiacYears.map((item) => (
+                          <SelectItem key={item.value} value={item.value} className="text-sm">
+                            <span className="flex items-center gap-2">
+                              <span>{item.emoji}</span>
+                              <span>{item.label.replace(item.emoji + ' ', '')}</span>
+                            </span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* 字数 - 三个按钮 */}
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-bold flex items-center gap-1 text-foreground">
+                      <span className="text-sm">📝</span>
+                      字数
+                    </Label>
+                    <div className="grid grid-cols-3 gap-1">
+                      {wordCounts.map((item) => (
+                        <button
+                          key={item.value}
+                          onClick={() => setWordCount(item.value)}
+                          className={`py-1.5 text-xs font-bold rounded-lg border-2 transition-all duration-200 ${
+                            wordCount === item.value
+                              ? "bg-gradient-to-br from-amber-400 to-amber-600 text-white border-transparent shadow-md shadow-amber-500/30"
+                              : "bg-background/50 border-primary/10 hover:border-amber-500/50"
+                          }`}
+                        >
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* 祝福主题 - 图标网格 */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-bold flex items-center gap-1 text-foreground">
+                    <span className="text-sm">🎯</span>
+                    祝福主题
+                  </Label>
+                  <div className="grid grid-cols-4 gap-1.5">
+                    {themes.map((item) => (
+                      <TooltipProvider key={item.value}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button
+                              onClick={() => setTheme(item.value)}
+                              className={`flex flex-col items-center gap-0.5 p-2 rounded-lg border-2 transition-all duration-200 ${
+                                theme === item.value
+                                  ? "bg-gradient-to-br from-red-500/20 to-amber-500/20 border-red-500/50 shadow-sm"
+                                  : "bg-background/50 border-transparent hover:border-red-500/30 hover:bg-red-500/5"
+                              }`}
+                            >
+                              <span className={`text-base ${theme === item.value ? 'scale-110' : ''} transition-transform`}>{item.icon}</span>
+                              <span className="text-[9px] text-muted-foreground truncate w-full text-center">{item.label}</span>
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom" className="text-xs">{item.label}</TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 语气氛围 - 四个选项 */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-bold flex items-center gap-1 text-foreground">
+                    <span className="text-sm">🎭</span>
+                    语气氛围
+                  </Label>
+                  <div className="grid grid-cols-4 gap-1.5">
+                    {tones.map((item) => (
+                      <button
+                        key={item.value}
+                        onClick={() => setTone(item.value)}
+                        className={`flex flex-col items-center gap-0.5 py-2 px-1 rounded-lg border-2 transition-all duration-200 ${
+                          tone === item.value
+                            ? `bg-gradient-to-br ${item.color} text-white border-transparent shadow-md`
+                            : "bg-background/50 border-transparent hover:border-primary/20"
+                        }`}
+                      >
+                        <span className="text-sm">{item.icon}</span>
+                        <span className="text-[10px]">{item.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 创作风格 - 下拉列表 */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-bold flex items-center gap-1 text-foreground">
+                    <span className="text-sm">🎨</span>
+                    创作风格
+                  </Label>
+                  <Select value={style} onValueChange={setStyle}>
+                    <SelectTrigger className="h-9 bg-background/80 border-2 border-purple-500/20 hover:border-purple-500/40 rounded-lg text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {styles.map((item) => (
+                        <SelectItem key={item.value} value={item.value} className="text-sm">
+                          <span className="flex items-center gap-2">
+                            <span>{item.icon}</span>
+                            <span>{item.label}</span>
+                            <span className="text-xs text-muted-foreground">- {item.desc}</span>
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* 高级选项折叠区 */}
+              <div className="space-y-1.5">
+                <button
+                  onClick={() => setShowAdvanced(!showAdvanced)}
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg border transition-all duration-300 ${
+                    showAdvanced
+                      ? "bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-purple-500/30"
+                      : "bg-background/50 border-dashed border-primary/15 hover:border-purple-500/30 hover:bg-purple-500/5"
+                  }`}
+                >
+                  <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                    <Star className="w-3.5 h-3.5" />
+                    高级选项
+                  </span>
+                  <span className={`text-xs text-muted-foreground transition-transform duration-300 ${showAdvanced ? "rotate-180" : ""}`}>
+                    ▼
+                  </span>
+                </button>
+
+                {showAdvanced && (
+                  <div className="space-y-3 p-3 rounded-lg bg-purple-500/5 border border-purple-500/15 animate-in slide-in-from-top-2">
+                    {/* 藏头春联 */}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-xs font-bold flex items-center gap-1 text-foreground">
+                          <span className="text-sm">✨</span>
+                          藏头春联
+                        </Label>
+                        {isAcrostic && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-500 text-white">已启用</span>
+                        )}
+                      </div>
+                      <Input
+                        placeholder="输入姓名（2-4字）"
+                        value={acrosticName}
+                        onChange={(e) => {
+                          setAcrosticName(e.target.value)
+                          setIsAcrostic(e.target.value.length >= 2)
+                        }}
+                        maxLength={4}
+                        className="h-8 text-xs bg-background/90 border border-red-500/20 focus:border-red-500 rounded"
+                      />
+                      {isAcrostic && (
+                        <p className="text-[10px] text-red-500 dark:text-red-400 font-medium">
+                          🎉 藏头「{acrosticName}」将融入春联
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* 当前配置预览 */}
+              <div className="p-2.5 rounded-lg bg-gradient-to-r from-red-500/5 via-amber-500/5 to-red-500/5 border border-red-500/10">
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <span className="text-xs">📋</span>
+                  <span className="text-[10px] font-medium text-muted-foreground">当前配置</span>
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-red-500/10 text-[10px]">
+                    {configSummary.zodiac?.emoji}
+                  </span>
+                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-amber-500/10 text-[10px]">
+                    {configSummary.wordCount?.label}
+                  </span>
+                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-purple-500/10 text-[10px]">
+                    {configSummary.style?.icon} {configSummary.style?.label}
+                  </span>
+                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-pink-500/10 text-[10px]">
+                    {configSummary.theme?.icon} {configSummary.theme?.label}
+                  </span>
+                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-orange-500/10 text-[10px]">
+                    {configSummary.tone?.icon} {configSummary.tone?.label}
+                  </span>
+                  {isAcrostic && (
+                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-green-500/10 text-[10px]">
+                      ✨ 藏「{acrosticName}」
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* 生成按钮 */}
+              <div className="flex gap-2 pt-2">
+                <Button
+                  className="flex-1 gap-2 h-12 text-base font-bold bg-gradient-to-r from-red-600 via-red-500 to-amber-500 hover:from-red-700 hover:via-red-600 hover:to-amber-600 shadow-xl shadow-red-500/40 transition-all duration-300 rounded-xl border-2 border-red-400/50 hover:scale-[1.02] active:scale-[0.98]"
+                  onClick={generateCouplet}
+                  disabled={isGenerating}
+                >
+                  {isGenerating ? (
+                    <>
+                      <RefreshCw className="h-5 w-5 animate-spin" />
+                      AI创作中...
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-lg">🚀</span>
+                      生成春联
+                      <Sparkles className="h-4 w-4" />
+                    </>
+                  )}
+                </Button>
+                {couplet && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={resetAll}
+                          className="h-12 w-12 bg-background/80 border-2 border-red-500/30 hover:bg-red-500/10 hover:border-red-500 shadow-lg rounded-xl transition-all hover:rotate-180 duration-500"
+                        >
+                          <RefreshCw className="h-5 w-5" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>重新开始</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
+              </div>
+
+              {/* 工具栏 */}
+              <div className="flex justify-center items-center gap-3 pt-2">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => setIsFavorite(!isFavorite)}
+                        className={`p-2 rounded-full transition-all duration-200 ${
+                          isFavorite 
+                            ? "bg-red-500/20 text-red-500" 
+                            : "bg-background/50 text-muted-foreground hover:bg-red-500/10 hover:text-red-500"
+                        }`}
+                      >
+                        <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>收藏配置</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button className="p-2 rounded-full bg-background/50 text-muted-foreground hover:bg-amber-500/10 hover:text-amber-500 transition-all duration-200">
+                        <History className="w-4 h-4" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>历史记录</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+
+              {/* 底部装饰 - 祥云图案 */}
+              <div className="flex justify-center items-center gap-2 pt-2 pb-1">
+                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-red-400/50 to-transparent" />
+                <div className="flex gap-1">
+                  <div className="w-1.5 h-1.5 rounded-full bg-red-400/60" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-amber-400/60" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-red-400/60" />
+                </div>
+                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-red-400/50 to-transparent" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="lg:col-span-2">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg">春联预览</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {isGenerating ? (
+                <div className="flex flex-col items-center justify-center py-16">
+                  <div className="relative">
+                    <div className="w-20 h-20 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
+                    <span className="absolute inset-0 flex items-center justify-center text-3xl font-brush">福</span>
+                  </div>
+                  <p className="mt-4 text-sm text-muted-foreground">AI正在创作中...</p>
+                </div>
+              ) : couplet ? (
+                <div className="flex flex-col items-center py-6">
+                  <div className="mb-8 px-8 py-3 horizontal-scroll rounded-lg">
+                    <span className="text-2xl font-brush text-shimmer tracking-[0.5em]">{couplet.horizontal}</span>
+                  </div>
+
+                  <div className="flex justify-center gap-12">
+                    {/* 上联 */}
+                    <div className="flex flex-col items-center">
+                      <div className="couplet-paper rounded-lg p-4 space-y-1">
+                        {couplet.upper.split("").map((char, i) => (
+                          <div
+                            key={i}
+                            className="w-12 h-12 flex items-center justify-center text-2xl font-brush text-gold couplet-char animate-char-appear"
+                            style={{ animationDelay: `${i * 0.1}s` }}
+                          >
+                            {char}
+                          </div>
+                        ))}
+                      </div>
+                      <span className="mt-3 text-xs text-muted-foreground">上联</span>
+                    </div>
+
+                    {/* 下联 */}
+                    <div className="flex flex-col items-center">
+                      <div className="couplet-paper rounded-lg p-4 space-y-1">
+                        {couplet.lower.split("").map((char, i) => (
+                          <div
+                            key={i}
+                            className="w-12 h-12 flex items-center justify-center text-2xl font-brush text-gold couplet-char animate-char-appear"
+                            style={{ animationDelay: `${(i + couplet.upper.length) * 0.1}s` }}
+                          >
+                            {char}
+                          </div>
+                        ))}
+                      </div>
+                      <span className="mt-3 text-xs text-muted-foreground">下联</span>
+                    </div>
+                  </div>
+
+                  {/* 生成图片按钮 */}
+                  <Button
+                    variant="outline"
+                    className="mt-8 gap-2 bg-transparent"
+                    onClick={generateImage}
+                    disabled={isGeneratingImage || !!generatedImage}
+                  >
+                    {isGeneratingImage ? (
+                      <>
+                        <RefreshCw className="h-4 w-4 animate-spin" />
+                        生成祝福图中...
+                      </>
+                    ) : generatedImage ? (
+                      <>
+                        <ImageIcon className="h-4 w-4" />
+                        已生成祝福图
+                      </>
+                    ) : (
+                      <>
+                        <ImageIcon className="h-4 w-4" />
+                        生成祝福图片
+                      </>
+                    )}
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                  <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mb-4">
+                    <span className="text-4xl font-brush opacity-30">福</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    配置好选项后
+                    <br />
+                    点击"生成春联"开始创作
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="lg:col-span-2">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg">生成结果</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {generatedImage ? (
+                <div className="space-y-4">
+                  {/* 生成的图片 */}
+                  <div className="relative rounded-lg overflow-hidden border">
+                    <img
+                      src={generatedImage || "/placeholder.svg"}
+                      alt="生成的春节祝福图"
+                      className="w-full aspect-[4/3] object-cover"
+                    />
+                    <Button size="sm" variant="secondary" className="absolute bottom-2 right-2 gap-1 h-7 text-xs">
+                      <Download className="h-3 w-3" />
+                      下载
+                    </Button>
+                  </div>
+
+                  {!mintedNFT && (
+                    <Button
+                      className="w-full gap-2 bg-secondary text-secondary-foreground hover:bg-secondary/90"
+                      onClick={mintNFT}
+                      disabled={isMinting}
+                    >
+                      {isMinting ? (
+                        <>
+                          <RefreshCw className="h-4 w-4 animate-spin" />
+                          铸造中...
+                        </>
+                      ) : (
+                        <>
+                          <Coins className="h-4 w-4" />
+                          铸造为NFT
+                        </>
+                      )}
+                    </Button>
+                  )}
+
+                  {/* NFT信息 */}
+                  {mintedNFT && (
+                    <div className="p-4 rounded-lg border border-secondary/30 bg-secondary/5">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Coins className="h-4 w-4 text-secondary" />
+                        <span className="font-medium text-sm">NFT铸造成功</span>
+                      </div>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Token ID</span>
+                          <span className="font-mono">#{mintedNFT.tokenId}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">交易哈希</span>
+                          <span className="font-mono text-xs truncate max-w-[180px]">{mintedNFT.txHash}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : isGeneratingImage ? (
+                <div className="flex flex-col items-center justify-center py-16">
+                  <div className="relative">
+                    <div className="w-16 h-16 rounded-full border-4 border-secondary/20 border-t-secondary animate-spin" />
+                    <ImageIcon className="absolute inset-0 m-auto h-6 w-6 text-secondary" />
+                  </div>
+                  <p className="mt-4 text-sm text-muted-foreground">AI正在生成祝福图...</p>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                  <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
+                    <ImageIcon className="h-8 w-8 text-muted-foreground/30" />
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    生成春联后
+                    <br />
+                    点击"生成祝福图片"创建精美图片
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </main>
+  )
+}

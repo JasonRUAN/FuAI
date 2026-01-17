@@ -1,26 +1,274 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* 春节主题 - 红金配色 */
+  --background: oklch(0.98 0.01 30);
+  --foreground: oklch(0.2 0.02 30);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.2 0.02 30);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.2 0.02 30);
+  --primary: oklch(0.5 0.2 25); /* 中国红 */
+  --primary-foreground: oklch(0.98 0.01 60);
+  --secondary: oklch(0.75 0.15 85); /* 金色 */
+  --secondary-foreground: oklch(0.25 0.05 30);
+  --muted: oklch(0.95 0.02 30);
+  --muted-foreground: oklch(0.45 0.02 30);
+  --accent: oklch(0.75 0.15 85); /* 金色 */
+  --accent-foreground: oklch(0.25 0.05 30);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.577 0.245 27.325);
+  --border: oklch(0.9 0.03 30);
+  --input: oklch(0.92 0.02 30);
+  --ring: oklch(0.5 0.2 25);
+  --chart-1: oklch(0.5 0.2 25);
+  --chart-2: oklch(0.75 0.15 85);
+  --chart-3: oklch(0.6 0.15 50);
+  --chart-4: oklch(0.65 0.12 70);
+  --chart-5: oklch(0.55 0.18 35);
+  --radius: 0.75rem;
+  --sidebar: oklch(0.98 0.01 30);
+  --sidebar-foreground: oklch(0.2 0.02 30);
+  --sidebar-primary: oklch(0.5 0.2 25);
+  --sidebar-primary-foreground: oklch(0.98 0.01 60);
+  --sidebar-accent: oklch(0.95 0.02 30);
+  --sidebar-accent-foreground: oklch(0.2 0.02 30);
+  --sidebar-border: oklch(0.9 0.03 30);
+  --sidebar-ring: oklch(0.5 0.2 25);
+}
+
+.dark {
+  --background: oklch(0.15 0.02 25);
+  --foreground: oklch(0.95 0.02 60);
+  --card: oklch(0.18 0.02 25);
+  --card-foreground: oklch(0.95 0.02 60);
+  --popover: oklch(0.18 0.02 25);
+  --popover-foreground: oklch(0.95 0.02 60);
+  --primary: oklch(0.55 0.22 25);
+  --primary-foreground: oklch(0.98 0.01 60);
+  --secondary: oklch(0.7 0.15 85);
+  --secondary-foreground: oklch(0.15 0.02 25);
+  --muted: oklch(0.25 0.02 25);
+  --muted-foreground: oklch(0.65 0.03 30);
+  --accent: oklch(0.7 0.15 85);
+  --accent-foreground: oklch(0.15 0.02 25);
+  --destructive: oklch(0.396 0.141 25.723);
+  --destructive-foreground: oklch(0.637 0.237 25.331);
+  --border: oklch(0.3 0.03 25);
+  --input: oklch(0.25 0.02 25);
+  --ring: oklch(0.55 0.22 25);
+  --chart-1: oklch(0.55 0.22 25);
+  --chart-2: oklch(0.7 0.15 85);
+  --chart-3: oklch(0.6 0.15 50);
+  --chart-4: oklch(0.65 0.12 70);
+  --chart-5: oklch(0.55 0.18 35);
+  --sidebar: oklch(0.18 0.02 25);
+  --sidebar-foreground: oklch(0.95 0.02 60);
+  --sidebar-primary: oklch(0.55 0.22 25);
+  --sidebar-primary-foreground: oklch(0.98 0.01 60);
+  --sidebar-accent: oklch(0.25 0.02 25);
+  --sidebar-accent-foreground: oklch(0.95 0.02 60);
+  --sidebar-border: oklch(0.3 0.03 25);
+  --sidebar-ring: oklch(0.55 0.22 25);
 }
 
 @theme inline {
+  /* 使用可爱的中文字体 */
+  --font-sans: "ZCOOL KuaiLe", "Geist", sans-serif;
+  --font-cute: "ZCOOL KuaiLe", sans-serif;
+  --font-serif: "ZCOOL XiaoWei", "Ma Shan Zheng", serif;
+  --font-brush: "Ma Shan Zheng", "ZCOOL XiaoWei", serif;
+  --font-mono: "Geist Mono", "Geist Mono Fallback";
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* 春联样式 */
+.couplet-vertical {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+}
+
+/* 书法字体样式 */
+.font-brush {
+  font-family: "Ma Shan Zheng", "Noto Serif SC", serif;
+}
+
+/* 春联文字特效 */
+.couplet-char {
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.3), 2px 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.couplet-char:hover {
+  transform: scale(1.1);
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.3), 2px 2px 4px rgba(0, 0, 0, 0.2), 0 0 20px rgba(255, 215, 0, 0.6);
+}
+
+/* 春联纸张效果 */
+.couplet-paper {
+  background: linear-gradient(145deg, oklch(0.5 0.2 25) 0%, oklch(0.45 0.22 25) 50%, oklch(0.5 0.2 25) 100%);
+  box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.1), 4px 4px 10px rgba(0, 0, 0, 0.3), 0 0 0 2px rgba(255, 215, 0, 0.3);
+  border: 2px solid rgba(255, 215, 0, 0.4);
+}
+
+/* 横批特效 */
+.horizontal-scroll {
+  background: linear-gradient(90deg, oklch(0.5 0.2 25) 0%, oklch(0.55 0.22 25) 50%, oklch(0.5 0.2 25) 100%);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), inset 0 0 20px rgba(255, 215, 0, 0.1);
+  border: 2px solid rgba(255, 215, 0, 0.5);
+}
+
+/* 金色文字效果 */
+.text-gold {
+  background: linear-gradient(180deg, #ffd700 0%, #ffec8b 30%, #ffd700 50%, #daa520 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* 文字出现动画 */
+@keyframes char-appear {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.5);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(5px) scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-char-appear {
+  animation: char-appear 0.6s ease-out forwards;
+}
+
+/* 闪光效果 */
+@keyframes shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.text-shimmer {
+  background: linear-gradient(90deg, #ffd700 0%, #fff8dc 25%, #ffd700 50%, #fff8dc 75%, #ffd700 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 3s linear infinite;
+}
+
+/* 春节装饰动画 */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes lantern-swing {
+  0%,
+  100% {
+    transform: rotate(-3deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
+}
+
+.animate-lantern {
+  animation: lantern-swing 2s ease-in-out infinite;
+  transform-origin: top center;
+}
+
+/* 添加烟花闪烁效果 */
+@keyframes sparkle {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.2);
+  }
+}
+
+.animate-sparkle {
+  animation: sparkle 1.5s ease-in-out infinite;
+}
+
+@keyframes glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.5));
+  }
+  50% {
+    filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8));
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
 }
