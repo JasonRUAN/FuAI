@@ -58,7 +58,7 @@ export function Footer() {
           <p className="text-sm text-muted-foreground flex items-center justify-center gap-1">
             Made with <Heart className="h-4 w-4 text-primary fill-primary" /> by FuAI Team
           </p>
-          <p className="text-xs text-muted-foreground mt-2">© 2025 FuAI. All rights reserved.</p>
+          <p className="text-xs text-muted-foreground mt-2">© 2026 FuAI. All rights reserved.</p>
         </div>
       </div>
     </footer>
