@@ -28,7 +28,12 @@ const queryKeys = {
 export function useTotalSupply() {
   return useQuery({
     queryKey: queryKeys.totalSupply(),
-    queryFn: () => nftService.getTotalSupply(),
+    queryFn: async () => {
+      console.log('Hook: 开始获取totalSupply...');
+      const result = await nftService.getTotalSupply();
+      console.log('Hook: totalSupply结果:', result);
+      return result;
+    },
     staleTime: 5 * 60 * 1000, // 5分钟内不重新获取
     gcTime: 10 * 60 * 1000,   // 10分钟后清理缓存
   });
@@ -40,13 +45,26 @@ export function useTotalSupply() {
 export function useNFTList(params: PaginationParams) {
   const { address } = useAccount();
   
-  return useQuery({
+  const query = useQuery({
     queryKey: queryKeys.list(params),
-    queryFn: () => nftService.getNFTsPaginated(params, address),
+    queryFn: async () => {
+      console.log('Hook: 开始分页获取NFT列表...', params);
+      console.log('Hook: 用户地址:', address);
+      const result = await nftService.getNFTsPaginated(params, address);
+      console.log('Hook: 分页获取结果:', result);
+      return result;
+    },
     staleTime: 2 * 60 * 1000, // 2分钟内不重新获取
     gcTime: 5 * 60 * 1000,    // 5分钟后清理缓存
     enabled: true,
+    retry: 1, // 减少重试次数
+    refetchOnWindowFocus: false, // 禁用窗口焦点重新获取
   });
+
+  // 添加查询状态调试
+  console.log('Hook: useNFTList状态 - isLoading:', query.isLoading, 'isFetching:', query.isFetching, 'isSuccess:', query.isSuccess, 'data:', !!query.data);
+
+  return query;
 }
 
 /**

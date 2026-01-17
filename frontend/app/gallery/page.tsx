@@ -52,7 +52,6 @@ export default function GalleryPage() {
     filterBy: searchTerm ? { owner: searchTerm } : undefined
   }
 
-  // 数据获取
   const { 
     data: nftListData, 
     isLoading, 
@@ -107,9 +106,13 @@ export default function GalleryPage() {
 
   // 处理图片点击
   const handleImageClick = (imageUrl: string, nft?: NFTData) => {
+    console.log('Gallery: 处理图片点击')
+    console.log('Gallery: imageUrl:', imageUrl)
+    console.log('Gallery: nft:', nft)
     setSelectedImageUrl(imageUrl)
     setSelectedNFT(nft || null)
     setImageViewerOpen(true)
+    console.log('Gallery: 设置完成，imageViewerOpen应该为true')
   }
 
   // 处理转移点击
@@ -322,16 +325,26 @@ export default function GalleryPage() {
                 ? 'sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
                 : 'grid-cols-1 max-w-4xl mx-auto'
             }`}>
-              {nftListData?.data.map((nft) => (
-                <NFTCard
-                  key={nft.tokenId}
-                  nft={nft}
-                  viewMode={viewMode}
-                  onImageClick={(imageUrl) => handleImageClick(imageUrl, nft)}
-                  onTransferClick={handleTransferClick}
-                />
-              ))}
-            </div>
+              {nftListData?.data.map((nft) => {
+                // 添加调试日志
+                console.log('Gallery: 准备渲染NFT卡片:', {
+                  tokenId: nft.tokenId,
+                  hasContent: !!nft.content,
+                  upperLine: nft.content?.upperLine,
+                  lowerLine: nft.content?.lowerLine,
+                  horizontalScroll: nft.content?.horizontalScroll,
+                })
+                return (
+                  <NFTCard
+                    key={nft.tokenId}
+                    nft={nft}
+                    viewMode={viewMode}
+                    onImageClick={(imageUrl) => handleImageClick(imageUrl, nft)}
+                    onTransferClick={handleTransferClick}
+                  />
+                )
+              })}
+              </div>
 
             {/* 分页控制 */}
             {nftListData && nftListData.pagination.totalPages > 1 && (
