@@ -1,4 +1,4 @@
-export const contractConfigig = {
+export const contractConfig = {
   address: "0x5684D13F92b6880CdB4AE2bc322aAeFD8392cccA",
   abi: [
     {
