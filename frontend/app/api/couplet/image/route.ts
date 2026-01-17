@@ -378,13 +378,13 @@ export async function POST(request: NextRequest) {
 
     // 构图尺寸映射
     const layoutSizes: Record<string, string> = {
-      horizontal: "1664*936",
-      vertical: "936*1664",
-      square: "1024*1024",
-      "golden-ratio": "1600*1000",
-      "traditional-scroll": "1200*1600",
+      horizontal: "1024*576",
+      vertical: "576*1024",
+      square: "768*768",
+      "golden-ratio": "1024*640",
+      "traditional-scroll": "768*1024",
     };
-    const imageSize = layoutSizes[selectedLayout] || "1664*928";
+    const imageSize = layoutSizes[selectedLayout] || "1024*576";
 
     // 辅助函数：映射旧配置到新配置
     function mapLegacyStyleToArtStyle(legacyStyle: string): string {
@@ -738,7 +738,7 @@ export async function GET() {
           metadata: {
             model: "qwen-image-max",
             timestamp: 1640995200000,
-            imageSize: "1664*936",
+            imageSize: "1024*576",
           },
         },
       },
@@ -762,11 +762,11 @@ export async function GET() {
       model: "qwen-image-max",
       timeout: "60秒",
       supportedSizes: {
-        horizontal: "1664*936",
-        vertical: "936*1664",
-        square: "1024*1024",
-        "golden-ratio": "1600*1000",
-        "traditional-scroll": "1200*1600",
+        horizontal: "1024*576",
+        vertical: "576*1024",
+        square: "768*768",
+        "golden-ratio": "1024*640",
+        "traditional-scroll": "768*1024",
       },
     },
   });
