@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -21,9 +20,6 @@ import {
   Download,
   Shuffle,
   Star,
-  CheckCircle,
-  Copy,
-  ExternalLink,
 } from "lucide-react";
 import { useAccount } from "wagmi";
 import { ArtStyleSelector } from "@/components/image-generation/art-style-selector";
@@ -1174,125 +1170,29 @@ export default function CreatePage() {
                     </Button>
                   </div>
 
-                  {/* NFT铸造成功信息 */}
+                  {/* NFT信息 */}
                   {mintedNFT && (
-                    <div className="p-6 rounded-xl border border-green-200 bg-gradient-to-br from-green-50 to-emerald-50 shadow-lg">
-                      {/* 成功标题 */}
-                      <div className="flex items-center gap-3 mb-4">
-                        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-green-100">
-                          <CheckCircle className="h-6 w-6 text-green-600" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-green-800 text-lg">
-                            🎉 NFT铸造成功！
-                          </h3>
-                          <p className="text-green-600 text-sm">
-                            您的春联NFT已成功上链
-                          </p>
-                        </div>
+                    <div className="p-4 rounded-lg border border-secondary/30 bg-secondary/5">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Coins className="h-4 w-4 text-secondary" />
+                        <span className="font-medium text-sm">NFT铸造成功</span>
                       </div>
-
-                      {/* NFT信息卡片 */}
-                      <div className="space-y-4">
-                        {/* Token ID */}
-                        <div className="flex items-center justify-between p-3 bg-white/60 rounded-lg border border-green-100">
-                          <div className="flex items-center gap-2">
-                            <Coins className="h-4 w-4 text-green-600" />
-                            <span className="text-green-700 font-medium">Token ID</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
-                              #{mintedNFT.tokenId}
-                            </Badge>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={async () => {
-                                try {
-                                  await navigator.clipboard.writeText(mintedNFT.tokenId);
-                                  toast.success("Token ID已复制");
-                                } catch (error) {
-                                  toast.error("复制失败");
-                                }
-                              }}
-                              className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-100"
-                            >
-                              <Copy className="h-3 w-3" />
-                            </Button>
-                          </div>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">
+                            Token ID
+                          </span>
+                          <span className="font-mono">
+                            #{mintedNFT.tokenId}
+                          </span>
                         </div>
-
-                        {/* 交易哈希 */}
-                        <div className="p-3 bg-white/60 rounded-lg border border-green-100">
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-2">
-                              <ExternalLink className="h-4 w-4 text-green-600" />
-                              <span className="text-green-700 font-medium">交易哈希</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={async () => {
-                                  try {
-                                    await navigator.clipboard.writeText(mintedNFT.txHash);
-                                    toast.success("交易哈希已复制");
-                                  } catch (error) {
-                                    toast.error("复制失败");
-                                  }
-                                }}
-                                className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-100"
-                                title="复制交易哈希"
-                              >
-                                <Copy className="h-3 w-3" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                  const explorerUrl = `https://testnet.monadvision.com/tx/${mintedNFT.txHash}`;
-                                  window.open(explorerUrl, '_blank');
-                                }}
-                                className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-100"
-                                title="在区块链浏览器中查看"
-                              >
-                                <ExternalLink className="h-3 w-3" />
-                              </Button>
-                            </div>
-                          </div>
-                          <div className="bg-slate-50 rounded-md p-2 border">
-                            <code className="text-xs font-mono text-slate-700 break-all leading-relaxed">
-                              {mintedNFT.txHash}
-                            </code>
-                          </div>
-                        </div>
-
-                        {/* 操作按钮 */}
-                        <div className="flex gap-3 pt-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              const explorerUrl = `https://testnet.monadvision.com/tx/${mintedNFT.txHash}`;
-                              window.open(explorerUrl, '_blank');
-                            }}
-                            className="flex-1 border-green-200 text-green-700 hover:bg-green-50"
-                          >
-                            <ExternalLink className="h-4 w-4 mr-2" />
-                            查看交易详情
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              // 跳转到gallery页面查看所有NFT
-                              window.location.href = '/gallery';
-                            }}
-                            className="flex-1 border-green-200 text-green-700 hover:bg-green-50"
-                          >
-                            <Coins className="h-4 w-4 mr-2" />
-                            查看NFT画廊
-                          </Button>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">
+                            交易哈希
+                          </span>
+                          <span className="font-mono text-xs truncate max-w-[180px]">
+                            {mintedNFT.txHash}
+                          </span>
                         </div>
                       </div>
                     </div>
