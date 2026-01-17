@@ -33,9 +33,9 @@ export function Header() {
               <span className="text-2xl font-bold text-yellow-300 font-brush animate-float">福</span>
             </div>
           </div>
-          <div className="flex flex-col">
+          <div className="flex items-center gap-2">
             <span className="text-4xl font-bold text-shimmer tracking-wide">FuAI</span>
-            <span className="text-base text-yellow-200/80 tracking-wider">春节祝福AI助手</span>
+            <span className="text-2xl font-bold text-yellow-200 tracking-wider">(福联AI)</span>
           </div>
           {/* 装饰灯笼 */}
           <div className="hidden lg:flex items-center gap-1 ml-2">
