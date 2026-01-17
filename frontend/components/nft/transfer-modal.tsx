@@ -5,7 +5,7 @@
 "use client"
 
 import { useState } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogPortal, DialogOverlay } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -26,6 +26,7 @@ import { useTransferNFT } from "@/hooks/use-nft-data"
 import { useAccount } from "wagmi"
 import { toast } from "sonner"
 import { isAddress } from "viem"
+import * as DialogPrimitive from '@radix-ui/react-dialog'
 
 interface TransferModalProps {
   isOpen: boolean
@@ -148,19 +149,21 @@ export function TransferModal({ isOpen, onClose, nft }: TransferModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md bg-slate-900 border-slate-700">
+      <DialogPortal>
+        <DialogPrimitive.Overlay className="fixed inset-0 z-[60] bg-black/50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+        <DialogPrimitive.Content className="fixed top-[50%] left-[50%] z-[60] grid w-full max-w-md translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border-2 border-amber-500/30 bg-gradient-to-br from-red-950/95 via-amber-950/95 to-red-950/95 backdrop-blur-xl p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-slate-200">
-            <Send className="h-5 w-5 text-purple-400" />
-            转移NFT
+          <DialogTitle className="flex items-center gap-2 text-transparent bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-300 bg-clip-text font-bold">
+            <Send className="h-5 w-5 text-amber-400" />
+            赠送NFT
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
           {/* NFT信息 */}
-          <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
+          <div className="bg-red-900/30 rounded-lg p-4 border border-amber-500/30">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 rounded-lg overflow-hidden bg-slate-700">
+              <div className="w-12 h-12 rounded-lg overflow-hidden bg-red-900/50 border border-amber-500/30">
                 <img
                   src={nft.content.imageUrl}
                   alt={nft.content.horizontalScroll}
@@ -168,15 +171,15 @@ export function TransferModal({ isOpen, onClose, nft }: TransferModalProps) {
                 />
               </div>
               <div>
-                <div className="font-medium text-slate-200">
+                <div className="font-bold text-amber-200">
                   {nft.content.horizontalScroll}
                 </div>
-                <Badge variant="outline" className="text-xs border-purple-500/50 text-purple-300">
+                <Badge variant="outline" className="text-xs border-red-500/50 text-red-400 bg-red-950/30">
                   #{nft.tokenId}
                 </Badge>
               </div>
             </div>
-            <div className="text-sm text-slate-400 space-y-1">
+            <div className="text-sm text-amber-400/80 space-y-1">
               <div>上联：{nft.content.upperLine}</div>
               <div>下联：{nft.content.lowerLine}</div>
             </div>
@@ -186,7 +189,7 @@ export function TransferModal({ isOpen, onClose, nft }: TransferModalProps) {
           {step === 'input' && (
             <div className="space-y-4">
               <div>
-                <Label htmlFor="recipient" className="text-slate-300">
+                <Label htmlFor="recipient" className="text-amber-200 font-medium">
                   接收者地址
                 </Label>
                 <div className="mt-2">
@@ -195,7 +198,7 @@ export function TransferModal({ isOpen, onClose, nft }: TransferModalProps) {
                     placeholder="0x..."
                     value={recipientAddress}
                     onChange={(e) => handleAddressChange(e.target.value)}
-                    className="bg-slate-800 border-slate-700 text-slate-200 placeholder:text-slate-500"
+                    className="bg-red-950/30 border-amber-500/30 text-amber-100 placeholder:text-amber-400/50 focus:border-amber-400"
                   />
                 </div>
                 {recipientAddress && !isValidAddress(recipientAddress) && (
@@ -206,7 +209,7 @@ export function TransferModal({ isOpen, onClose, nft }: TransferModalProps) {
               <Alert className="border-amber-500/50 bg-amber-500/10">
                 <AlertTriangle className="h-4 w-4 text-amber-400" />
                 <AlertDescription className="text-amber-300">
-                  请确认接收者地址正确，NFT转移后无法撤销
+                  请确认接收者地址正确，NFT赠送后无法撤销
                 </AlertDescription>
               </Alert>
 
@@ -214,14 +217,14 @@ export function TransferModal({ isOpen, onClose, nft }: TransferModalProps) {
                 <Button
                   variant="outline"
                   onClick={handleClose}
-                  className="flex-1 border-slate-700 text-slate-300 hover:bg-slate-800"
+                  className="flex-1 border-amber-500/30 text-amber-300 hover:!bg-red-900/30 hover:!text-amber-200 hover:border-amber-400 bg-transparent"
                 >
                   取消
                 </Button>
                 <Button
                   onClick={handleContinue}
                   disabled={!recipientAddress || !isValidAddress(recipientAddress)}
-                  className="flex-1 bg-purple-600 hover:bg-purple-700"
+                  className="flex-1 bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600 text-white font-semibold"
                 >
                   继续
                 </Button>
@@ -233,36 +236,36 @@ export function TransferModal({ isOpen, onClose, nft }: TransferModalProps) {
           {step === 'confirm' && (
             <div className="space-y-4">
               <div className="space-y-3">
-                <div className="flex items-center justify-between py-2 border-b border-slate-700">
-                  <span className="text-slate-400">从</span>
+                <div className="flex items-center justify-between py-2 border-b border-amber-500/30">
+                  <span className="text-amber-400/80">从</span>
                   <div className="flex items-center gap-2">
-                    <User className="h-4 w-4 text-slate-400" />
-                    <span className="text-slate-200 font-mono">
+                    <User className="h-4 w-4 text-amber-400/80" />
+                    <span className="text-amber-200 font-mono">
                       {formatAddress(nft.owner)}
                     </span>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => copyAddress(nft.owner)}
-                      className="h-6 w-6 p-0 text-slate-400 hover:text-slate-200"
+                      className="h-6 w-6 p-0 text-amber-400/80 hover:text-amber-200 hover:bg-red-900/30"
                     >
                       <Copy className="h-3 w-3" />
                     </Button>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between py-2 border-b border-slate-700">
-                  <span className="text-slate-400">到</span>
+                <div className="flex items-center justify-between py-2 border-b border-amber-500/30">
+                  <span className="text-amber-400/80">到</span>
                   <div className="flex items-center gap-2">
-                    <Wallet className="h-4 w-4 text-slate-400" />
-                    <span className="text-slate-200 font-mono">
+                    <Wallet className="h-4 w-4 text-amber-400/80" />
+                    <span className="text-amber-200 font-mono">
                       {formatAddress(recipientAddress)}
                     </span>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => copyAddress(recipientAddress)}
-                      className="h-6 w-6 p-0 text-slate-400 hover:text-slate-200"
+                      className="h-6 w-6 p-0 text-amber-400/80 hover:text-amber-200 hover:bg-red-900/30"
                     >
                       <Copy className="h-3 w-3" />
                     </Button>
@@ -270,15 +273,15 @@ export function TransferModal({ isOpen, onClose, nft }: TransferModalProps) {
                 </div>
 
                 <div className="flex items-center justify-between py-2">
-                  <span className="text-slate-400">Gas费用</span>
-                  <span className="text-slate-200">由发送者承担</span>
+                  <span className="text-amber-400/80">Gas费用</span>
+                  <span className="text-amber-200">由发送者承担</span>
                 </div>
               </div>
 
               <Alert className="border-red-500/50 bg-red-500/10">
                 <AlertTriangle className="h-4 w-4 text-red-400" />
                 <AlertDescription className="text-red-300">
-                  确认转移后，NFT的所有权将立即转移给接收者，此操作不可撤销
+                  确认赠送后，NFT的所有权将立即转移给接收者，此操作不可撤销
                 </AlertDescription>
               </Alert>
 
@@ -286,15 +289,15 @@ export function TransferModal({ isOpen, onClose, nft }: TransferModalProps) {
                 <Button
                   variant="outline"
                   onClick={() => setStep('input')}
-                  className="flex-1 border-slate-700 text-slate-300 hover:bg-slate-800"
+                  className="flex-1 border-amber-500/30 text-amber-300 hover:!bg-red-900/30 hover:!text-amber-200 hover:border-amber-400 bg-transparent"
                 >
                   返回
                 </Button>
                 <Button
                   onClick={handleTransfer}
-                  className="flex-1 bg-red-600 hover:bg-red-700"
+                  className="flex-1 bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600 text-white font-semibold"
                 >
-                  确认转移
+                  确认赠送
                 </Button>
               </div>
             </div>
@@ -304,13 +307,18 @@ export function TransferModal({ isOpen, onClose, nft }: TransferModalProps) {
           {step === 'processing' && (
             <div className="text-center space-y-4">
               <div className="flex justify-center">
-                <Loader2 className="h-12 w-12 animate-spin text-purple-400" />
+                <div className="relative">
+                  <Loader2 className="h-12 w-12 animate-spin text-amber-400" />
+                  <div className="absolute inset-0 flex items-center justify-center text-2xl animate-pulse">
+                    🏮
+                  </div>
+                </div>
               </div>
               <div>
-                <h3 className="text-lg font-medium text-slate-200 mb-2">
-                  正在处理转移...
+                <h3 className="text-lg font-bold text-transparent bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-300 bg-clip-text mb-2">
+                  正在处理赠送...
                 </h3>
-                <p className="text-slate-400 text-sm">
+                <p className="text-amber-400/80 text-sm">
                   请在钱包中确认交易，这可能需要几分钟时间
                 </p>
               </div>
@@ -324,23 +332,23 @@ export function TransferModal({ isOpen, onClose, nft }: TransferModalProps) {
                 <CheckCircle className="h-12 w-12 text-green-400" />
               </div>
               <div>
-                <h3 className="text-lg font-medium text-slate-200 mb-2">
-                  转移成功！
+                <h3 className="text-lg font-bold text-transparent bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-300 bg-clip-text mb-2">
+                  赠送成功！
                 </h3>
-                <p className="text-slate-400 text-sm mb-4">
-                  NFT已成功转移到目标地址
+                <p className="text-amber-400/80 text-sm mb-4">
+                  NFT已成功赠送到目标地址
                 </p>
                 
                 {txHash && (
-                  <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700">
+                  <div className="bg-red-900/30 rounded-lg p-3 border border-amber-500/30">
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-400 text-sm">交易哈希</span>
+                      <span className="text-amber-400/80 text-sm">交易哈希</span>
                       <div className="flex items-center gap-2">
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={copyTxHash}
-                          className="h-6 w-6 p-0 text-slate-400 hover:text-slate-200"
+                          className="h-6 w-6 p-0 text-amber-400/80 hover:text-amber-200 hover:bg-red-900/30"
                         >
                           <Copy className="h-3 w-3" />
                         </Button>
@@ -348,13 +356,13 @@ export function TransferModal({ isOpen, onClose, nft }: TransferModalProps) {
                           variant="ghost"
                           size="sm"
                           onClick={viewTransaction}
-                          className="h-6 w-6 p-0 text-slate-400 hover:text-slate-200"
+                          className="h-6 w-6 p-0 text-amber-400/80 hover:text-amber-200 hover:bg-red-900/30"
                         >
                           <ExternalLink className="h-3 w-3" />
                         </Button>
                       </div>
                     </div>
-                    <div className="text-slate-200 font-mono text-sm mt-1">
+                    <div className="text-amber-200 font-mono text-sm mt-1">
                       {formatAddress(txHash)}
                     </div>
                   </div>
@@ -363,14 +371,15 @@ export function TransferModal({ isOpen, onClose, nft }: TransferModalProps) {
 
               <Button
                 onClick={handleClose}
-                className="w-full bg-purple-600 hover:bg-purple-700"
+                className="w-full bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600 text-white font-semibold"
               >
                 完成
               </Button>
             </div>
           )}
         </div>
-      </DialogContent>
+        </DialogPrimitive.Content>
+      </DialogPortal>
     </Dialog>
   )
 }

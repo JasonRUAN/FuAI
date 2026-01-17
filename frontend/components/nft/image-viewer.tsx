@@ -15,7 +15,7 @@ import {
   ZoomIn, 
   ZoomOut, 
   RotateCw, 
-  Share2,
+  Gift,
   Maximize2,
   Minimize2,
   Move,
@@ -23,15 +23,18 @@ import {
 } from "lucide-react"
 import { NFTData } from "@/types/nft"
 import { toast } from "sonner"
+import { useAccount } from "wagmi"
 
 interface ImageViewerProps {
   isOpen: boolean
   onClose: () => void
   nft: NFTData | null
   imageUrl?: string
+  onTransferClick?: (tokenId: string) => void
 }
 
-export function ImageViewer({ isOpen, onClose, nft, imageUrl }: ImageViewerProps) {
+export function ImageViewer({ isOpen, onClose, nft, imageUrl, onTransferClick }: ImageViewerProps) {
+  const { address: userAddress } = useAccount()
   const [scale, setScale] = useState(1)
   const [rotation, setRotation] = useState(0)
   const [position, setPosition] = useState({ x: 0, y: 0 })
@@ -43,6 +46,9 @@ export function ImageViewer({ isOpen, onClose, nft, imageUrl }: ImageViewerProps
   const [fitMode, setFitMode] = useState<'contain' | 'cover' | 'fill'>('contain')
 
   const displayImageUrl = imageUrl || nft?.content.imageUrl
+  
+  // 判断是否为所有者
+  const isOwner = userAddress && nft && nft.owner.toLowerCase() === userAddress.toLowerCase()
 
   console.log('ImageViewer: isOpen =', isOpen)
   console.log('ImageViewer: displayImageUrl =', displayImageUrl)
@@ -92,13 +98,6 @@ export function ImageViewer({ isOpen, onClose, nft, imageUrl }: ImageViewerProps
           if (e.ctrlKey || e.metaKey) {
             e.preventDefault()
             handleDownload()
-          }
-          break
-        case 's':
-        case 'S':
-          if (e.ctrlKey || e.metaKey) {
-            e.preventDefault()
-            handleShare()
           }
           break
       }
@@ -182,27 +181,22 @@ export function ImageViewer({ isOpen, onClose, nft, imageUrl }: ImageViewerProps
     }
   }
 
-  // 分享图片
-  const handleShare = async () => {
-    if (!displayImageUrl || !nft) return
-
-    const shareData = {
-      title: `春联NFT #${nft.tokenId}`,
-      text: `${nft.content.upperLine} | ${nft.content.lowerLine} | ${nft.content.horizontalScroll}`,
-      url: window.location.href
+  // 赠送NFT
+  const handleGift = () => {
+    if (!userAddress) {
+      toast.error('请先连接钱包')
+      return
     }
 
-    try {
-      if (navigator.share) {
-        await navigator.share(shareData)
-      } else {
-        await navigator.clipboard.writeText(shareData.url)
-        toast.success('链接已复制到剪贴板')
-      }
-    } catch (error) {
-      console.error('Share failed:', error)
-      toast.error('分享失败')
+    if (!isOwner) {
+      toast.error('只有NFT所有者才能赠送')
+      return
     }
+
+    if (!nft || !onTransferClick) return
+    
+    // 直接打开转移弹窗，不关闭图片查看器
+    onTransferClick(nft.tokenId)
   }
 
   // 格式化地址
@@ -320,14 +314,14 @@ export function ImageViewer({ isOpen, onClose, nft, imageUrl }: ImageViewerProps
                 <Download className="h-4 w-4" />
               </Button>
 
-              {nft && (
+              {isOwner && onTransferClick && (
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={handleShare}
+                  onClick={handleGift}
                   className="text-amber-300 hover:text-amber-100 hover:bg-red-900/50 border border-amber-500/20 hover:border-amber-400/40 transition-all"
                 >
-                  <Share2 className="h-4 w-4" />
+                  <Gift className="h-4 w-4" />
                 </Button>
               )}
 

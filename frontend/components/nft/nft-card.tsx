@@ -10,9 +10,8 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { 
   Heart, 
-  Share2, 
   Eye,
-  Send,
+  Gift,
   Calendar,
   User,
 } from "lucide-react"
@@ -85,31 +84,8 @@ export function NFTCard({ nft, viewMode, onImageClick, onTransferClick }: NFTCar
     }
   }
 
-  // 处理分享
-  const handleShare = async (e: React.MouseEvent) => {
-    e.stopPropagation()
-    
-    const shareData = {
-      title: `春联NFT #${nft.tokenId}`,
-      text: `${nft.content.upperLine} | ${nft.content.lowerLine} | ${nft.content.horizontalScroll}`,
-      url: window.location.href
-    }
-
-    try {
-      if (navigator.share) {
-        await navigator.share(shareData)
-      } else {
-        await navigator.clipboard.writeText(shareData.url)
-        toast.success('链接已复制到剪贴板')
-      }
-    } catch (error) {
-      console.error('Share failed:', error)
-      toast.error('分享失败')
-    }
-  }
-
-  // 处理转移
-  const handleTransfer = (e: React.MouseEvent) => {
+  // 处理赠送
+  const handleGift = (e: React.MouseEvent) => {
     e.stopPropagation()
     
     if (!userAddress) {
@@ -118,7 +94,7 @@ export function NFTCard({ nft, viewMode, onImageClick, onTransferClick }: NFTCar
     }
 
     if (!isOwner) {
-      toast.error('只有NFT所有者才能转移')
+      toast.error('只有NFT所有者才能赠送')
       return
     }
 
@@ -236,23 +212,15 @@ export function NFTCard({ nft, viewMode, onImageClick, onTransferClick }: NFTCar
                 <Eye className="h-4 w-4 mr-1" />
                 查看
               </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={handleShare}
-                className="text-muted-foreground hover:text-amber-600"
-              >
-                <Share2 className="h-4 w-4" />
-              </Button>
               {isOwner && (
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={handleTransfer}
+                  onClick={handleGift}
                   className="border-amber-500/30 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/30"
                 >
-                  <Send className="h-4 w-4 mr-1" />
-                  发送
+                  <Gift className="h-4 w-4 mr-1" />
+                  赠送
                 </Button>
               )}
             </div>
@@ -262,37 +230,43 @@ export function NFTCard({ nft, viewMode, onImageClick, onTransferClick }: NFTCar
     )
   }
 
-  // 列表模式渲染 - 文字版春联（横向排列）
+  // 列表模式渲染 - 文字版春联（横向排列，固定高度）
   return (
     <Card className="group hover:shadow-xl hover:shadow-red-500/20 transition-all duration-300 overflow-hidden bg-gradient-to-br from-red-50 via-amber-50/50 to-red-50 dark:from-red-950/30 dark:via-amber-950/20 dark:to-red-950/30 border-red-500/20 backdrop-blur-sm">
-      <CardContent className="p-4">
+      <CardContent className="p-3">
         <div className="flex items-center gap-6">
-          {/* 左侧春联文字 */}
-          <div className="flex-1 flex items-center gap-4">
-            {/* 横批 */}
-            <div className="px-3 py-1 bg-gradient-to-r from-red-500 to-amber-500 text-white rounded-lg shadow-md">
-              <span className="text-sm font-bold">
+          {/* 左侧春联文字 - 固定宽度，支持滚动 */}
+          <div className="flex-1 flex items-center gap-4 min-w-0 overflow-hidden">
+            {/* 横批 - 固定宽度 */}
+            <div className="flex-shrink-0 px-3 py-2 bg-gradient-to-r from-red-500 to-amber-500 text-white rounded-lg shadow-md min-w-[80px] max-w-[100px] flex items-center justify-center">
+              <span className="text-sm font-bold truncate w-full text-center">
                 {nft.content.horizontalScroll}
               </span>
             </div>
 
-            {/* 上下联（横向排列） */}
-            <div className="flex gap-3">
+            {/* 上下联（横向排列）- 自适应宽度，使用ellipsis */}
+            <div className="flex gap-3 flex-1 min-w-0 items-center">
               {/* 上联 */}
-              <div className="flex items-center gap-1">
-                <span className="text-xs text-muted-foreground">上联：</span>
-                <div className="bg-gradient-to-r from-red-600/90 to-red-700/90 text-white rounded px-2 py-1 shadow">
-                  <span className="text-sm font-bold tracking-wide">
+              <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                <span className="text-xs text-muted-foreground whitespace-nowrap">上联：</span>
+                <div className="bg-gradient-to-r from-red-600/90 to-red-700/90 text-white rounded px-3 py-2 shadow flex-1 min-w-0">
+                  <span 
+                    className="text-sm font-bold tracking-wide block truncate" 
+                    title={nft.content.upperLine}
+                  >
                     {nft.content.upperLine}
                   </span>
                 </div>
               </div>
 
               {/* 下联 */}
-              <div className="flex items-center gap-1">
-                <span className="text-xs text-muted-foreground">下联：</span>
-                <div className="bg-gradient-to-r from-red-600/90 to-red-700/90 text-white rounded px-2 py-1 shadow">
-                  <span className="text-sm font-bold tracking-wide">
+              <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                <span className="text-xs text-muted-foreground whitespace-nowrap">下联：</span>
+                <div className="bg-gradient-to-r from-red-600/90 to-red-700/90 text-white rounded px-3 py-2 shadow flex-1 min-w-0">
+                  <span 
+                    className="text-sm font-bold tracking-wide block truncate"
+                    title={nft.content.lowerLine}
+                  >
                     {nft.content.lowerLine}
                   </span>
                 </div>
@@ -300,30 +274,30 @@ export function NFTCard({ nft, viewMode, onImageClick, onTransferClick }: NFTCar
             </div>
           </div>
 
-          {/* 右侧信息和操作 */}
-          <div className="flex items-center gap-4">
+          {/* 右侧信息和操作 - 固定宽度 */}
+          <div className="flex items-center gap-4 flex-shrink-0">
             {/* 信息 */}
-            <div className="flex flex-col gap-2 min-w-[120px]">
+            <div className="flex flex-col gap-2 w-[160px]">
               <div className="flex items-center gap-2">
-                <Badge variant="outline" className="border-red-500/50 text-red-600 dark:text-red-400">
+                <Badge variant="outline" className="border-red-500/50 text-red-600 dark:text-red-400 flex-shrink-0">
                   #{nft.tokenId}
                 </Badge>
                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Calendar className="h-3 w-3" />
-                  {formatTime(nft.content.mintTime)}
+                  <Calendar className="h-3 w-3 flex-shrink-0" />
+                  <span className="truncate">{formatTime(nft.content.mintTime)}</span>
                 </div>
               </div>
               
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <User className="h-3 w-3" />
-                  {formatAddress(nft.owner)}
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1 text-xs text-muted-foreground min-w-0">
+                  <User className="h-3 w-3 flex-shrink-0" />
+                  <span className="truncate">{formatAddress(nft.owner)}</span>
                 </div>
                 
                 <button
                   onClick={handleLike}
                   disabled={isLiking || isUnliking}
-                  className="flex items-center gap-1 text-xs text-muted-foreground hover:text-red-500 transition-colors disabled:opacity-50"
+                  className="flex items-center gap-1 text-xs text-muted-foreground hover:text-red-500 transition-colors disabled:opacity-50 flex-shrink-0"
                 >
                   <Heart className={`h-4 w-4 ${nft.isLikedByUser ? "fill-red-500 text-red-500" : ""} ${(isLiking || isUnliking) ? "animate-pulse" : ""}`} />
                   {nft.likeCount}
@@ -332,7 +306,7 @@ export function NFTCard({ nft, viewMode, onImageClick, onTransferClick }: NFTCar
             </div>
 
             {/* 操作按钮 */}
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-shrink-0">
               <Button
                 size="sm"
                 variant="outline"
@@ -342,23 +316,15 @@ export function NFTCard({ nft, viewMode, onImageClick, onTransferClick }: NFTCar
                 <Eye className="h-4 w-4 mr-1" />
                 查看
               </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={handleShare}
-                className="text-muted-foreground hover:text-amber-600"
-              >
-                <Share2 className="h-4 w-4" />
-              </Button>
               {isOwner && (
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={handleTransfer}
+                  onClick={handleGift}
                   className="border-amber-500/30 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/30"
                 >
-                  <Send className="h-4 w-4 mr-1" />
-                  发送
+                  <Gift className="h-4 w-4 mr-1" />
+                  赠送
                 </Button>
               )}
             </div>
