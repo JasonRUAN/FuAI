@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
-import { Sparkles, RefreshCw, ImageIcon, Coins, Download, Shuffle, History, Heart, Star } from "lucide-react"
+import { Sparkles, RefreshCw, ImageIcon, Coins, Download, Shuffle, Star } from "lucide-react"
 import { useWallet } from "@/components/providers/wallet-provider"
 
 const zodiacYears = [
@@ -101,7 +101,6 @@ export default function CreatePage() {
   const [acrosticName, setAcrosticName] = useState("")
   const [isAcrostic, setIsAcrostic] = useState(false)
   const [showAdvanced, setShowAdvanced] = useState(false)
-  const [isFavorite, setIsFavorite] = useState(false)
 
   const [isGenerating, setIsGenerating] = useState(false)
   const [isGeneratingImage, setIsGeneratingImage] = useState(false)
@@ -253,9 +252,9 @@ export default function CreatePage() {
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-5 gap-6">
-          {/* 左侧：配置面板 */}
-          <Card className="lg:col-span-1 relative overflow-hidden border-0 bg-gradient-to-br from-red-50 via-amber-50/50 to-red-50 dark:from-red-950/30 dark:via-amber-950/20 dark:to-red-950/30">
+        <div className="grid lg:grid-cols-7 gap-6">
+          {/* 左侧：配置面板 - 占2份 */}
+          <Card className="lg:col-span-2 relative overflow-hidden border-0 bg-gradient-to-br from-red-50 via-amber-50/50 to-red-50 dark:from-red-950/30 dark:via-amber-950/20 dark:to-red-950/30">
             {/* 可爱喜庆边框 - 多层装饰 */}
             <div className="absolute inset-0 rounded-xl border-4 border-red-500/40 pointer-events-none" />
             <div className="absolute inset-1 rounded-lg border-2 border-dashed border-amber-400/60 pointer-events-none" />
@@ -281,45 +280,45 @@ export default function CreatePage() {
               <div className="w-3 h-5 bg-gradient-to-b from-red-500 to-red-600 rounded-full shadow-md shadow-red-500/50" />
             </div>
             
-            <CardHeader className="pb-3 border-b border-red-300/40 dark:border-red-500/20 mt-2">
-              <CardTitle className="flex flex-col items-center gap-1 text-lg">
+            <CardHeader className="pb-2 border-b border-red-300/40 dark:border-red-500/20 mt-2">
+              <CardTitle className="flex flex-col items-center gap-1">
                 <span className="bg-gradient-to-r from-red-500 via-amber-500 to-red-500 bg-clip-text text-transparent font-bold text-2xl">
                   春联配置
                 </span>
-                <p className="text-xs text-muted-foreground">定制您的专属祝福</p>
+                <p className="text-sm text-muted-foreground">定制您的专属春联</p>
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3 pt-4 px-4">
+            <CardContent className="space-y-4 pt-4 px-5">
               {/* 随机灵感按钮 - 置顶显示 */}
               <Button
                 variant="outline"
                 size="sm"
                 onClick={randomizeConfig}
-                className="w-full h-10 text-sm gap-2 border-2 border-dashed border-amber-500/50 hover:bg-gradient-to-r hover:from-amber-500/10 hover:to-red-500/10 hover:border-amber-500 bg-gradient-to-r from-amber-50/50 to-red-50/50 dark:from-amber-950/30 dark:to-red-950/30 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                className="w-full h-11 text-sm gap-2 border-2 border-dashed border-amber-500/50 hover:bg-gradient-to-r hover:from-amber-500/10 hover:to-red-500/10 hover:border-amber-500 bg-gradient-to-r from-amber-50/50 to-red-50/50 dark:from-amber-950/30 dark:to-red-950/30 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
               >
                 <Shuffle className="w-4 h-4 text-amber-500" />
-                <span className="font-bold bg-gradient-to-r from-amber-600 to-red-600 bg-clip-text text-transparent">随机灵感</span>
-                <span className="text-xs text-muted-foreground">一键生成创意配置</span>
+                <span className="font-bold text-base bg-gradient-to-r from-amber-600 to-red-600 bg-clip-text text-transparent">随机灵感</span>
+                <span className="text-sm text-muted-foreground">一键生成创意配置</span>
               </Button>
 
               {/* 分隔线 */}
               <div className="flex items-center gap-2">
                 <div className="h-px flex-1 bg-gradient-to-r from-transparent via-red-300/50 to-transparent" />
-                <span className="text-[10px] text-muted-foreground">自定义配置</span>
+                <span className="text-xs text-muted-foreground">自定义配置</span>
                 <div className="h-px flex-1 bg-gradient-to-r from-transparent via-red-300/50 to-transparent" />
               </div>
 
               {/* 基础设置 */}
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {/* 生肖年份 & 字数 - 并排 */}
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-bold flex items-center gap-1 text-foreground">
-                      <span className="text-sm">🐲</span>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-bold flex items-center gap-1 text-foreground">
+                      <span className="text-base">🐲</span>
                       生肖
                     </Label>
                     <Select value={zodiac} onValueChange={setZodiac}>
-                      <SelectTrigger className="h-9 bg-background/80 border-2 border-red-500/20 hover:border-red-500/40 rounded-lg text-xs">
+                      <SelectTrigger className="h-10 bg-background/80 border-2 border-red-500/20 hover:border-red-500/40 rounded-lg text-sm">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -336,17 +335,17 @@ export default function CreatePage() {
                   </div>
 
                   {/* 字数 - 三个按钮 */}
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-bold flex items-center gap-1 text-foreground">
-                      <span className="text-sm">📝</span>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-bold flex items-center gap-1 text-foreground">
+                      <span className="text-base">📝</span>
                       字数
                     </Label>
-                    <div className="grid grid-cols-3 gap-1">
+                    <div className="grid grid-cols-3 gap-1.5">
                       {wordCounts.map((item) => (
                         <button
                           key={item.value}
                           onClick={() => setWordCount(item.value)}
-                          className={`py-1.5 text-xs font-bold rounded-lg border-2 transition-all duration-200 ${
+                          className={`py-2 text-sm font-bold rounded-lg border-2 transition-all duration-200 ${
                             wordCount === item.value
                               ? "bg-gradient-to-br from-amber-400 to-amber-600 text-white border-transparent shadow-md shadow-amber-500/30"
                               : "bg-background/50 border-primary/10 hover:border-amber-500/50"
@@ -359,68 +358,60 @@ export default function CreatePage() {
                   </div>
                 </div>
 
-                {/* 祝福主题 - 图标网格 */}
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-bold flex items-center gap-1 text-foreground">
-                    <span className="text-sm">🎯</span>
+                {/* 祝福主题 - 下拉框 */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-bold flex items-center gap-1 text-foreground">
+                    <span className="text-base">🎯</span>
                     祝福主题
                   </Label>
-                  <div className="grid grid-cols-4 gap-1.5">
-                    {themes.map((item) => (
-                      <TooltipProvider key={item.value}>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <button
-                              onClick={() => setTheme(item.value)}
-                              className={`flex flex-col items-center gap-0.5 p-2 rounded-lg border-2 transition-all duration-200 ${
-                                theme === item.value
-                                  ? "bg-gradient-to-br from-red-500/20 to-amber-500/20 border-red-500/50 shadow-sm"
-                                  : "bg-background/50 border-transparent hover:border-red-500/30 hover:bg-red-500/5"
-                              }`}
-                            >
-                              <span className={`text-base ${theme === item.value ? 'scale-110' : ''} transition-transform`}>{item.icon}</span>
-                              <span className="text-[9px] text-muted-foreground truncate w-full text-center">{item.label}</span>
-                            </button>
-                          </TooltipTrigger>
-                          <TooltipContent side="bottom" className="text-xs">{item.label}</TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    ))}
-                  </div>
+                  <Select value={theme} onValueChange={setTheme}>
+                    <SelectTrigger className="w-full h-10 bg-background/80 border-2 border-red-500/20 hover:border-red-500/40 rounded-lg text-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {themes.map((item) => (
+                        <SelectItem key={item.value} value={item.value} className="text-sm">
+                          <span className="flex items-center gap-2">
+                            <span>{item.icon}</span>
+                            <span>{item.label}</span>
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
-                {/* 语气氛围 - 四个选项 */}
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-bold flex items-center gap-1 text-foreground">
-                    <span className="text-sm">🎭</span>
-                    语气氛围
+                {/* 预期氛围 - 下拉框 */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-bold flex items-center gap-1 text-foreground">
+                    <span className="text-base">🎭</span>
+                    预期氛围
                   </Label>
-                  <div className="grid grid-cols-4 gap-1.5">
-                    {tones.map((item) => (
-                      <button
-                        key={item.value}
-                        onClick={() => setTone(item.value)}
-                        className={`flex flex-col items-center gap-0.5 py-2 px-1 rounded-lg border-2 transition-all duration-200 ${
-                          tone === item.value
-                            ? `bg-gradient-to-br ${item.color} text-white border-transparent shadow-md`
-                            : "bg-background/50 border-transparent hover:border-primary/20"
-                        }`}
-                      >
-                        <span className="text-sm">{item.icon}</span>
-                        <span className="text-[10px]">{item.label}</span>
-                      </button>
-                    ))}
-                  </div>
+                  <Select value={tone} onValueChange={setTone}>
+                    <SelectTrigger className="w-full h-10 bg-background/80 border-2 border-orange-500/20 hover:border-orange-500/40 rounded-lg text-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {tones.map((item) => (
+                        <SelectItem key={item.value} value={item.value} className="text-sm">
+                          <span className="flex items-center gap-2">
+                            <span>{item.icon}</span>
+                            <span>{item.label}</span>
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {/* 创作风格 - 下拉列表 */}
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-bold flex items-center gap-1 text-foreground">
-                    <span className="text-sm">🎨</span>
+                <div className="space-y-2">
+                  <Label className="text-sm font-bold flex items-center gap-1 text-foreground">
+                    <span className="text-base">🎨</span>
                     创作风格
                   </Label>
                   <Select value={style} onValueChange={setStyle}>
-                    <SelectTrigger className="h-9 bg-background/80 border-2 border-purple-500/20 hover:border-purple-500/40 rounded-lg text-xs">
+                    <SelectTrigger className="w-full h-10 bg-background/80 border-2 border-purple-500/20 hover:border-purple-500/40 rounded-lg text-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -439,35 +430,35 @@ export default function CreatePage() {
               </div>
 
               {/* 高级选项折叠区 */}
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <button
                   onClick={() => setShowAdvanced(!showAdvanced)}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg border transition-all duration-300 ${
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg border transition-all duration-300 ${
                     showAdvanced
                       ? "bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-purple-500/30"
                       : "bg-background/50 border-dashed border-primary/15 hover:border-purple-500/30 hover:bg-purple-500/5"
                   }`}
                 >
-                  <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                    <Star className="w-3.5 h-3.5" />
+                  <span className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                    <Star className="w-4 h-4" />
                     高级选项
                   </span>
-                  <span className={`text-xs text-muted-foreground transition-transform duration-300 ${showAdvanced ? "rotate-180" : ""}`}>
+                  <span className={`text-sm text-muted-foreground transition-transform duration-300 ${showAdvanced ? "rotate-180" : ""}`}>
                     ▼
                   </span>
                 </button>
 
                 {showAdvanced && (
-                  <div className="space-y-3 p-3 rounded-lg bg-purple-500/5 border border-purple-500/15 animate-in slide-in-from-top-2">
+                  <div className="space-y-3 p-4 rounded-lg bg-purple-500/5 border border-purple-500/15 animate-in slide-in-from-top-2">
                     {/* 藏头春联 */}
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <Label className="text-xs font-bold flex items-center gap-1 text-foreground">
-                          <span className="text-sm">✨</span>
+                        <Label className="text-sm font-bold flex items-center gap-1 text-foreground">
+                          <span className="text-base">✨</span>
                           藏头春联
                         </Label>
                         {isAcrostic && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-500 text-white">已启用</span>
+                          <span className="text-xs px-2 py-0.5 rounded bg-red-500 text-white">已启用</span>
                         )}
                       </div>
                       <Input
@@ -478,10 +469,10 @@ export default function CreatePage() {
                           setIsAcrostic(e.target.value.length >= 2)
                         }}
                         maxLength={4}
-                        className="h-8 text-xs bg-background/90 border border-red-500/20 focus:border-red-500 rounded"
+                        className="h-10 text-sm bg-background/90 border border-red-500/20 focus:border-red-500 rounded"
                       />
                       {isAcrostic && (
-                        <p className="text-[10px] text-red-500 dark:text-red-400 font-medium">
+                        <p className="text-xs text-red-500 dark:text-red-400 font-medium">
                           🎉 藏头「{acrosticName}」将融入春联
                         </p>
                       )}
@@ -491,29 +482,29 @@ export default function CreatePage() {
               </div>
 
               {/* 当前配置预览 */}
-              <div className="p-2.5 rounded-lg bg-gradient-to-r from-red-500/5 via-amber-500/5 to-red-500/5 border border-red-500/10">
-                <div className="flex items-center gap-1.5 mb-1.5">
-                  <span className="text-xs">📋</span>
-                  <span className="text-[10px] font-medium text-muted-foreground">当前配置</span>
+              <div className="p-3 rounded-lg bg-gradient-to-r from-red-500/5 via-amber-500/5 to-red-500/5 border border-red-500/10">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-sm">📋</span>
+                  <span className="text-xs font-medium text-muted-foreground">当前配置</span>
                 </div>
-                <div className="flex flex-wrap gap-1">
-                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-red-500/10 text-[10px]">
+                <div className="flex flex-wrap gap-1.5">
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-red-500/10 text-xs">
                     {configSummary.zodiac?.emoji}
                   </span>
-                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-amber-500/10 text-[10px]">
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-amber-500/10 text-xs">
                     {configSummary.wordCount?.label}
                   </span>
-                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-purple-500/10 text-[10px]">
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-purple-500/10 text-xs">
                     {configSummary.style?.icon} {configSummary.style?.label}
                   </span>
-                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-pink-500/10 text-[10px]">
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-pink-500/10 text-xs">
                     {configSummary.theme?.icon} {configSummary.theme?.label}
                   </span>
-                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-orange-500/10 text-[10px]">
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-orange-500/10 text-xs">
                     {configSummary.tone?.icon} {configSummary.tone?.label}
                   </span>
                   {isAcrostic && (
-                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-green-500/10 text-[10px]">
+                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-green-500/10 text-xs">
                       ✨ 藏「{acrosticName}」
                     </span>
                   )}
@@ -523,7 +514,7 @@ export default function CreatePage() {
               {/* 生成按钮 */}
               <div className="flex gap-2 pt-2">
                 <Button
-                  className="flex-1 gap-2 h-12 text-base font-bold bg-gradient-to-r from-red-600 via-red-500 to-amber-500 hover:from-red-700 hover:via-red-600 hover:to-amber-600 shadow-xl shadow-red-500/40 transition-all duration-300 rounded-xl border-2 border-red-400/50 hover:scale-[1.02] active:scale-[0.98]"
+                  className="flex-1 gap-2 h-14 text-base font-bold bg-gradient-to-r from-red-600 via-red-500 to-amber-500 hover:from-red-700 hover:via-red-600 hover:to-amber-600 shadow-xl shadow-red-500/40 transition-all duration-300 rounded-2xl border-3 border-red-400/50 hover:scale-[1.02] active:scale-[0.98]"
                   onClick={generateCouplet}
                   disabled={isGenerating}
                 >
@@ -534,9 +525,9 @@ export default function CreatePage() {
                     </>
                   ) : (
                     <>
-                      <span className="text-lg">🚀</span>
+                      <span className="text-xl">🚀</span>
                       生成春联
-                      <Sparkles className="h-4 w-4" />
+                      <Sparkles className="h-5 w-5" />
                     </>
                   )}
                 </Button>
@@ -559,37 +550,6 @@ export default function CreatePage() {
                 )}
               </div>
 
-              {/* 工具栏 */}
-              <div className="flex justify-center items-center gap-3 pt-2">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        onClick={() => setIsFavorite(!isFavorite)}
-                        className={`p-2 rounded-full transition-all duration-200 ${
-                          isFavorite 
-                            ? "bg-red-500/20 text-red-500" 
-                            : "bg-background/50 text-muted-foreground hover:bg-red-500/10 hover:text-red-500"
-                        }`}
-                      >
-                        <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent>收藏配置</TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button className="p-2 rounded-full bg-background/50 text-muted-foreground hover:bg-amber-500/10 hover:text-amber-500 transition-all duration-200">
-                        <History className="w-4 h-4" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent>历史记录</TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-
               {/* 底部装饰 - 祥云图案 */}
               <div className="flex justify-center items-center gap-2 pt-2 pb-1">
                 <div className="h-px flex-1 bg-gradient-to-r from-transparent via-red-400/50 to-transparent" />
@@ -603,11 +563,42 @@ export default function CreatePage() {
             </CardContent>
           </Card>
 
-          <Card className="lg:col-span-2">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg">春联预览</CardTitle>
+          {/* 中间：春联预览 - 占2份 */}
+          <Card className="lg:col-span-2 relative overflow-hidden border-0 bg-gradient-to-br from-red-50 via-amber-50/50 to-red-50 dark:from-red-950/30 dark:via-amber-950/20 dark:to-red-950/30">
+            {/* 可爱喜庆边框 - 多层装饰 */}
+            <div className="absolute inset-0 rounded-xl border-4 border-red-500/40 pointer-events-none" />
+            <div className="absolute inset-1 rounded-lg border-2 border-dashed border-amber-400/60 pointer-events-none" />
+            <div className="absolute inset-2 rounded-md border border-red-400/30 pointer-events-none" />
+            
+            {/* 角落装饰 - 中国结风格 */}
+            <div className="absolute -top-1 -left-1 w-8 h-8 bg-gradient-to-br from-red-500 to-amber-500 rounded-br-2xl flex items-center justify-center shadow-lg">
+              <span className="text-white text-xs">福</span>
+            </div>
+            <div className="absolute -top-1 -right-1 w-8 h-8 bg-gradient-to-bl from-red-500 to-amber-500 rounded-bl-2xl flex items-center justify-center shadow-lg">
+              <span className="text-white text-xs">喜</span>
+            </div>
+            <div className="absolute -bottom-1 -left-1 w-8 h-8 bg-gradient-to-tr from-red-500 to-amber-500 rounded-tr-2xl flex items-center justify-center shadow-lg">
+              <span className="text-white text-xs">吉</span>
+            </div>
+            <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-gradient-to-tl from-red-500 to-amber-500 rounded-tl-2xl flex items-center justify-center shadow-lg">
+              <span className="text-white text-xs">祥</span>
+            </div>
+            
+            {/* 顶部灯笼装饰 */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 flex gap-6">
+              <div className="w-3 h-5 bg-gradient-to-b from-red-500 to-red-600 rounded-full shadow-md shadow-red-500/50" />
+              <div className="w-3 h-5 bg-gradient-to-b from-red-500 to-red-600 rounded-full shadow-md shadow-red-500/50" />
+            </div>
+            
+            <CardHeader className="pb-2 border-b border-red-300/40 dark:border-red-500/20 mt-2">
+              <CardTitle className="flex flex-col items-center gap-1">
+                <span className="bg-gradient-to-r from-red-500 via-amber-500 to-red-500 bg-clip-text text-transparent font-bold text-2xl">
+                  春联预览
+                </span>
+                <p className="text-sm text-muted-foreground">AI智能创作展示</p>
+              </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-4 px-5">
               {isGenerating ? (
                 <div className="flex flex-col items-center justify-center py-16">
                   <div className="relative">
@@ -658,25 +649,26 @@ export default function CreatePage() {
 
                   {/* 生成图片按钮 */}
                   <Button
-                    variant="outline"
-                    className="mt-8 gap-2 bg-transparent"
+                    className="mt-8 gap-2 h-14 text-base font-bold bg-gradient-to-r from-red-600 via-red-500 to-amber-500 hover:from-red-700 hover:via-red-600 hover:to-amber-600 shadow-xl shadow-red-500/40 transition-all duration-300 rounded-2xl border-3 border-red-400/50 hover:scale-[1.02] active:scale-[0.98]"
                     onClick={generateImage}
                     disabled={isGeneratingImage || !!generatedImage}
                   >
                     {isGeneratingImage ? (
                       <>
-                        <RefreshCw className="h-4 w-4 animate-spin" />
-                        生成祝福图中...
+                        <RefreshCw className="h-5 w-5 animate-spin" />
+                        生成春联图中...
                       </>
                     ) : generatedImage ? (
                       <>
-                        <ImageIcon className="h-4 w-4" />
-                        已生成祝福图
+                        <span className="text-xl">✅</span>
+                        已生成春联图
+                        <ImageIcon className="h-5 w-5" />
                       </>
                     ) : (
                       <>
-                        <ImageIcon className="h-4 w-4" />
-                        生成祝福图片
+                        <span className="text-xl">🎨</span>
+                        生成春联图片
+                        <ImageIcon className="h-5 w-5" />
                       </>
                     )}
                   </Button>
@@ -696,11 +688,42 @@ export default function CreatePage() {
             </CardContent>
           </Card>
 
-          <Card className="lg:col-span-2">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg">生成结果</CardTitle>
+          {/* 右侧：生成结果 - 占3份 */}
+          <Card className="lg:col-span-3 relative overflow-hidden border-0 bg-gradient-to-br from-red-50 via-amber-50/50 to-red-50 dark:from-red-950/30 dark:via-amber-950/20 dark:to-red-950/30">
+            {/* 可爱喜庆边框 - 多层装饰 */}
+            <div className="absolute inset-0 rounded-xl border-4 border-red-500/40 pointer-events-none" />
+            <div className="absolute inset-1 rounded-lg border-2 border-dashed border-amber-400/60 pointer-events-none" />
+            <div className="absolute inset-2 rounded-md border border-red-400/30 pointer-events-none" />
+            
+            {/* 角落装饰 - 中国结风格 */}
+            <div className="absolute -top-1 -left-1 w-8 h-8 bg-gradient-to-br from-red-500 to-amber-500 rounded-br-2xl flex items-center justify-center shadow-lg">
+              <span className="text-white text-xs">福</span>
+            </div>
+            <div className="absolute -top-1 -right-1 w-8 h-8 bg-gradient-to-bl from-red-500 to-amber-500 rounded-bl-2xl flex items-center justify-center shadow-lg">
+              <span className="text-white text-xs">喜</span>
+            </div>
+            <div className="absolute -bottom-1 -left-1 w-8 h-8 bg-gradient-to-tr from-red-500 to-amber-500 rounded-tr-2xl flex items-center justify-center shadow-lg">
+              <span className="text-white text-xs">吉</span>
+            </div>
+            <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-gradient-to-tl from-red-500 to-amber-500 rounded-tl-2xl flex items-center justify-center shadow-lg">
+              <span className="text-white text-xs">祥</span>
+            </div>
+            
+            {/* 顶部灯笼装饰 */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 flex gap-6">
+              <div className="w-3 h-5 bg-gradient-to-b from-red-500 to-red-600 rounded-full shadow-md shadow-red-500/50" />
+              <div className="w-3 h-5 bg-gradient-to-b from-red-500 to-red-600 rounded-full shadow-md shadow-red-500/50" />
+            </div>
+            
+            <CardHeader className="pb-2 border-b border-red-300/40 dark:border-red-500/20 mt-2">
+              <CardTitle className="flex flex-col items-center gap-1">
+                <span className="bg-gradient-to-r from-red-500 via-amber-500 to-red-500 bg-clip-text text-transparent font-bold text-2xl">
+                  生成结果
+                </span>
+                <p className="text-sm text-muted-foreground">精美春联图片展示</p>
+              </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-4 px-5">
               {generatedImage ? (
                 <div className="space-y-4">
                   {/* 生成的图片 */}
@@ -718,19 +741,20 @@ export default function CreatePage() {
 
                   {!mintedNFT && (
                     <Button
-                      className="w-full gap-2 bg-secondary text-secondary-foreground hover:bg-secondary/90"
+                      className="w-full gap-2 h-14 text-base font-bold bg-gradient-to-r from-red-600 via-red-500 to-amber-500 hover:from-red-700 hover:via-red-600 hover:to-amber-600 shadow-xl shadow-red-500/40 transition-all duration-300 rounded-2xl border-3 border-red-400/50 hover:scale-[1.02] active:scale-[0.98]"
                       onClick={mintNFT}
                       disabled={isMinting}
                     >
                       {isMinting ? (
                         <>
-                          <RefreshCw className="h-4 w-4 animate-spin" />
+                          <RefreshCw className="h-5 w-5 animate-spin" />
                           铸造中...
                         </>
                       ) : (
                         <>
-                          <Coins className="h-4 w-4" />
+                          <span className="text-xl">💎</span>
                           铸造为NFT
+                          <Coins className="h-5 w-5" />
                         </>
                       )}
                     </Button>
@@ -762,7 +786,7 @@ export default function CreatePage() {
                     <div className="w-16 h-16 rounded-full border-4 border-secondary/20 border-t-secondary animate-spin" />
                     <ImageIcon className="absolute inset-0 m-auto h-6 w-6 text-secondary" />
                   </div>
-                  <p className="mt-4 text-sm text-muted-foreground">AI正在生成祝福图...</p>
+                  <p className="mt-4 text-sm text-muted-foreground">AI正在生成春联图...</p>
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -772,7 +796,7 @@ export default function CreatePage() {
                   <p className="text-sm text-muted-foreground">
                     生成春联后
                     <br />
-                    点击"生成祝福图片"创建精美图片
+                    点击"生成春联图片"创建精美图片
                   </p>
                 </div>
               )}

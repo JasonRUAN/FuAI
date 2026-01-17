@@ -35,7 +35,7 @@ export function Header() {
             </div>
           </div>
           <div className="flex flex-col">
-            <span className="text-4xl font-bold text-shimmer tracking-wide">CoupletFuAI</span>
+            <span className="text-4xl font-bold text-shimmer tracking-wide">FuAI</span>
             <span className="text-base text-yellow-200/80 tracking-wider">春节祝福AI助手</span>
           </div>
           {/* 装饰灯笼 */}

@@ -10,7 +10,7 @@ export function Footer() {
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-bold">
                 福
               </div>
-              <span className="text-lg font-bold text-primary">CoupletFuAI</span>
+              <span className="text-lg font-bold text-primary">FuAI</span>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
               基于大语言模型的智能春节文化内容生成区块链Dapp， 传统文化与现代AI技术的完美融合。
@@ -56,9 +56,9 @@ export function Footer() {
 
         <div className="border-t border-border pt-8 text-center">
           <p className="text-sm text-muted-foreground flex items-center justify-center gap-1">
-            Made with <Heart className="h-4 w-4 text-primary fill-primary" /> by CoupletFuAI Team
+            Made with <Heart className="h-4 w-4 text-primary fill-primary" /> by FuAI Team
           </p>
-          <p className="text-xs text-muted-foreground mt-2">© 2026 CoupletFuAI. All rights reserved.</p>
+          <p className="text-xs text-muted-foreground mt-2">© 2025 FuAI. All rights reserved.</p>
         </div>
       </div>
     </footer>

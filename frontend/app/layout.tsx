@@ -25,7 +25,7 @@ const maShanZheng = Ma_Shan_Zheng({
 })
 
 export const metadata: Metadata = {
-  title: "CoupletFuAI - 春节祝福AI助手",
+  title: "FuAI - 春节祝福AI助手",
   description: "基于大语言模型的智能春节文化内容生成区块链Dapp，传统文化与现代AI技术的完美融合",
   icons: {
     icon: [
