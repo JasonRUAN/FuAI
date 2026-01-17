@@ -1,5 +1,5 @@
 export const contractConfig = {
-  address: "0x3c38F77757fd19f218248ca8B0e916069883E390",
+  address: "0x5684D13F92b6880CdB4AE2bc322aAeFD8392cccA",
   abi: [
     {
       type: "constructor",
