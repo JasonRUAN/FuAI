@@ -11,8 +11,6 @@
 [![LangChain](https://img.shields.io/badge/LangChain-1.2-green?style=flat-square)](https://www.langchain.com/)
 [![Monad](https://img.shields.io/badge/Monad-Testnet-blue?style=flat-square)](https://monad.xyz/)
 
-[🎨 立即体验](#) | [📖 文档](#项目架构) | [🚀 快速开始](#快速开始) | [🎯 功能特性](#功能特性)
-
 </div>
 
 ---
