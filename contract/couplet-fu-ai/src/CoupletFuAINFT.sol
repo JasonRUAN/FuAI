@@ -187,10 +187,10 @@ contract CoupletFuAINFT is ERC721, ERC721Enumerable, Ownable {
     function likeCouplet(uint256 tokenId) public {
         _requireOwned(tokenId);
         require(!_userLikes[msg.sender][tokenId], "CoupletFuAINFT: Already liked");
-        
+
         _userLikes[msg.sender][tokenId] = true;
         _likes[tokenId]++;
-        
+
         emit CoupletLiked(tokenId, msg.sender, _likes[tokenId]);
     }
 
@@ -201,10 +201,10 @@ contract CoupletFuAINFT is ERC721, ERC721Enumerable, Ownable {
     function unlikeCouplet(uint256 tokenId) public {
         _requireOwned(tokenId);
         require(_userLikes[msg.sender][tokenId], "CoupletFuAINFT: Not liked yet");
-        
+
         _userLikes[msg.sender][tokenId] = false;
         _likes[tokenId]--;
-        
+
         emit CoupletUnliked(tokenId, msg.sender, _likes[tokenId]);
     }
 
@@ -245,7 +245,7 @@ contract CoupletFuAINFT is ERC721, ERC721Enumerable, Ownable {
         _requireOwned(tokenId);
 
         CoupletContent memory content = _coupletContent[tokenId];
-        
+
         // 构建 JSON metadata
         string memory json = string(
             abi.encodePacked(
@@ -257,8 +257,8 @@ contract CoupletFuAINFT is ERC721, ERC721Enumerable, Ownable {
                 '{"trait_type":"Upper Line","value":"', content.upperLine, '"},',
                 '{"trait_type":"Lower Line","value":"', content.lowerLine, '"},',
                 '{"trait_type":"Horizontal Scroll","value":"', content.horizontalScroll, '"},',
-                '{"trait_type":"Mint Time","display_type":"date","value":', 
-                Strings.toString(content.mintTime), 
+                '{"trait_type":"Mint Time","display_type":"date","value":',
+                Strings.toString(content.mintTime),
                 '}]}'
             )
         );

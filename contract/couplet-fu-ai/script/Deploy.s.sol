@@ -23,7 +23,7 @@ contract DeployScript is Script {
         console.log("Contract owner:", nft.owner());
         console.log("Initial mint fee:", nft.mintFee());
         console.log("\nDeployment successful!");
-        
+
         // 输出配置信息用于前端
         console.log("\n=== Frontend Configuration ===");
         console.log("Contract Address:", address(nft));
