@@ -244,27 +244,25 @@ export function NFTCard({ nft, viewMode, onImageClick, onTransferClick }: NFTCar
               </span>
             </div>
 
-            {/* 上下联（横向排列）- 等宽展示 */}
-            <div className="flex gap-3 flex-1 min-w-0 items-center">
-              {/* 上联 */}
-              <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                <span className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">上联：</span>
-                <div className="bg-gradient-to-r from-red-600/90 to-red-700/90 text-white rounded px-3 py-2 shadow w-full max-w-[280px]">
+            {/* 上下联（在同一个红色框中）*/}
+            <div className="bg-gradient-to-r from-red-600/90 to-red-700/90 text-white rounded px-4 py-2 shadow flex-1 min-w-0 max-w-[600px]">
+              <div className="flex items-center gap-4">
+                {/* 上联 */}
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <span className="text-xs whitespace-nowrap flex-shrink-0">上联：</span>
                   <span 
-                    className="text-sm font-bold tracking-wide block truncate" 
+                    className="text-sm font-bold tracking-wide truncate" 
                     title={nft.content.upperLine}
                   >
                     {nft.content.upperLine}
                   </span>
                 </div>
-              </div>
 
-              {/* 下联 */}
-              <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                <span className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">下联：</span>
-                <div className="bg-gradient-to-r from-red-600/90 to-red-700/90 text-white rounded px-3 py-2 shadow w-full max-w-[280px]">
+                {/* 下联 */}
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <span className="text-xs whitespace-nowrap flex-shrink-0">下联：</span>
                   <span 
-                    className="text-sm font-bold tracking-wide block truncate"
+                    className="text-sm font-bold tracking-wide truncate"
                     title={nft.content.lowerLine}
                   >
                     {nft.content.lowerLine}
