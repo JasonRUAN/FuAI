@@ -24,6 +24,7 @@
 - 💎 **NFT 铸造**：将创作的春联永久保存在区块链上
 - 🖼️ **作品展示**：精美的 NFT 画廊，支持点赞、转移等社交功能
 - 🔒 **去中心化存储**：使用 IPFS 保证图片永久可访问
+- 🌐 **Web2 友好**：无需连接钱包即可体验 AI 创作功能，只有铸造 NFT 时才需要钱包
 
 ---
 
@@ -398,6 +399,12 @@ Foundry (智能合约开发)
 MetaMask 或其他 Web3 钱包
 ```
 
+**⚠️ 重要提示：本项目部署在 Monad 测试网**
+
+- 🌐 **网络**：Monad Testnet
+- 💧 **领取测试币**：[https://faucet.monad.xyz/](https://faucet.monad.xyz/)
+- 📝 **说明**：使用前请先添加 Monad 测试网到钱包，并领取测试币用于支付 Gas 费用
+
 ### 1. 克隆项目
 
 ```bash
@@ -420,8 +427,11 @@ forge build
 forge test -vv
 
 # 部署到 Monad Testnet
+# 注意：请确保钱包中有足够的 Monad 测试币
 ./deploy.sh
 ```
+
+> 💡 **提示**：部署前请确保已在 [Monad 水龙头](https://faucet.monad.xyz/) 领取测试币
 
 ### 3. 启动前端
 
