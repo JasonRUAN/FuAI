@@ -3,9 +3,9 @@ import type { Metadata } from "next"
 import { ZCOOL_KuaiLe, ZCOOL_XiaoWei, Ma_Shan_Zheng } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
-import { WalletProvider } from "@/components/providers/wallet-provider"
 import { Header } from "@/components/header"
 import { Toaster } from "@/components/ui/sonner"
+import { Web3Provider } from "@/providers/Web3Provider";
 
 const zcoolKuaiLe = ZCOOL_KuaiLe({
   subsets: ["latin"],
@@ -57,11 +57,11 @@ export default function RootLayout({
       <body
         className={`${zcoolKuaiLe.variable} ${zcoolXiaoWei.variable} ${maShanZheng.variable} font-cute antialiased`}
       >
-        <WalletProvider>
+        <Web3Provider>
           <Header />
           {children}
           <Toaster />
-        </WalletProvider>
+        </Web3Provider>
         <Analytics />
       </body>
     </html>

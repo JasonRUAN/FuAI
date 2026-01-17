@@ -1,206 +1,368 @@
 "use client"
 
-import { useState } from "react"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Heart, Share2, ExternalLink } from "lucide-react"
-
-const galleryItems = [
-  {
-    id: 1,
-    upper: "龙腾虎跃新春到",
-    lower: "燕舞莺歌吉祥来",
-    horizontal: "春满乾坤",
-    author: "0x1234...5678",
-    tokenId: "#1001",
-    style: "传统典雅",
-    theme: "新春祝福",
-    likes: 128,
-    image: "/chinese-new-year-dragon-blessing.jpg",
-  },
-  {
-    id: 2,
-    upper: "财源滚滚达三江",
-    lower: "生意兴隆通四海",
-    horizontal: "招财进宝",
-    author: "0xabcd...efgh",
-    tokenId: "#1002",
-    style: "传统典雅",
-    theme: "财运亨通",
-    likes: 256,
-    image: "/chinese-new-year-wealth-prosperity.jpg",
-  },
-  {
-    id: 3,
-    upper: "鹏程万里展宏图",
-    lower: "骏业千秋创伟业",
-    horizontal: "前程似锦",
-    author: "0x9876...5432",
-    tokenId: "#1003",
-    style: "现代简约",
-    theme: "事业有成",
-    likes: 89,
-    image: "/chinese-new-year-career-success.jpg",
-  },
-  {
-    id: 4,
-    upper: "春风送暖入屠苏",
-    lower: "爆竹声中一岁除",
-    horizontal: "新春快乐",
-    author: "0xfedc...ba98",
-    tokenId: "#1004",
-    style: "文艺清新",
-    theme: "新春祝福",
-    likes: 312,
-    image: "/chinese-new-year-spring-festival.jpg",
-  },
-  {
-    id: 5,
-    upper: "金蛇献瑞迎新岁",
-    lower: "玉燕衔春报喜来",
-    horizontal: "蛇年大吉",
-    author: "0x2468...1357",
-    tokenId: "#1005",
-    style: "传统典雅",
-    theme: "新春祝福",
-    likes: 178,
-    image: "/chinese-new-year-snake-zodiac.jpg",
-  },
-  {
-    id: 6,
-    upper: "身体康健福寿全",
-    lower: "家庭和睦幸福长",
-    horizontal: "健康平安",
-    author: "0x1357...2468",
-    tokenId: "#1006",
-    style: "温馨祝福",
-    theme: "健康长寿",
-    likes: 203,
-    image: "/chinese-new-year-health-blessing.jpg",
-  },
-  {
-    id: 7,
-    upper: "金榜题名登科第",
-    lower: "蟾宫折桂步青云",
-    horizontal: "学业有成",
-    author: "0xaaaa...bbbb",
-    tokenId: "#1007",
-    style: "文艺清新",
-    theme: "学业进步",
-    likes: 145,
-    image: "/chinese-new-year-study-success.jpg",
-  },
-  {
-    id: 8,
-    upper: "月老牵线缘千里",
-    lower: "红娘搭桥情万年",
-    horizontal: "百年好合",
-    author: "0xcccc...dddd",
-    tokenId: "#1008",
-    style: "浪漫唯美",
-    theme: "爱情美满",
-    likes: 421,
-    image: "/chinese-new-year-love-romance.jpg",
-  },
-]
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Badge } from "@/components/ui/badge"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { 
+  Search, 
+  SortAsc, 
+  SortDesc, 
+  RefreshCw, 
+  Filter,
+  Grid3X3,
+  List,
+  AlertCircle
+} from "lucide-react"
+import { useNFTList, useTotalSupply, usePreloadNextPage, useRefreshNFTData } from "@/hooks/use-nft-data"
+import { PaginationParams, NFTData } from "@/types/nft"
+import { NFTCard } from "@/components/nft/nft-card"
+import { NFTGridSkeleton } from "@/components/nft/nft-grid-skeleton"
+import { ImageViewer } from "@/components/nft/image-viewer"
+import { TransferModal } from "@/components/nft/transfer-modal"
+import { Pagination } from "@/components/ui/pagination"
 
 export default function GalleryPage() {
-  const [likedItems, setLikedItems] = useState<number[]>([])
+  // 状态管理
+  const [searchTerm, setSearchTerm] = useState("")
+  const [sortBy, setSortBy] = useState<PaginationParams['sortBy']>('newest')
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  
+  // 图片查看器状态
+  const [imageViewerOpen, setImageViewerOpen] = useState(false)
+  const [selectedNFT, setSelectedNFT] = useState<NFTData | null>(null)
+  const [selectedImageUrl, setSelectedImageUrl] = useState<string>("")
+  
+  // 转移弹窗状态
+  const [transferModalOpen, setTransferModalOpen] = useState(false)
+  const [transferNFT, setTransferNFT] = useState<NFTData | null>(null)
+  
+  const pageSize = 20
 
-  const toggleLike = (id: number) => {
-    setLikedItems((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]))
+  // 查询参数
+  const queryParams: PaginationParams = {
+    page: currentPage,
+    limit: pageSize,
+    sortBy,
+    filterBy: searchTerm ? { owner: searchTerm } : undefined
+  }
+
+  // 数据获取
+  const { 
+    data: nftListData, 
+    isLoading, 
+    error, 
+    refetch: refetchList 
+  } = useNFTList(queryParams)
+  
+  const { 
+    data: totalSupply, 
+    isLoading: totalSupplyLoading 
+  } = useTotalSupply()
+
+  // 预加载和刷新
+  const preloadNextPage = usePreloadNextPage()
+  const { refreshAll, refreshList } = useRefreshNFTData()
+
+  // 预加载下一页
+  useEffect(() => {
+    if (nftListData?.pagination.hasNext) {
+      preloadNextPage(currentPage, pageSize)
+    }
+  }, [currentPage, pageSize, nftListData?.pagination.hasNext, preloadNextPage])
+
+  // 处理刷新
+  const handleRefresh = async () => {
+    setIsRefreshing(true)
+    try {
+      await refreshList(queryParams)
+      await refetchList()
+    } finally {
+      setIsRefreshing(false)
+    }
+  }
+
+  // 处理搜索
+  const handleSearch = (value: string) => {
+    setSearchTerm(value)
+    setCurrentPage(1) // 重置到第一页
+  }
+
+  // 处理排序
+  const handleSortChange = (value: string) => {
+    setSortBy(value as PaginationParams['sortBy'])
+    setCurrentPage(1)
+  }
+
+  // 处理分页
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  // 处理图片点击
+  const handleImageClick = (imageUrl: string, nft?: NFTData) => {
+    setSelectedImageUrl(imageUrl)
+    setSelectedNFT(nft || null)
+    setImageViewerOpen(true)
+  }
+
+  // 处理转移点击
+  const handleTransferClick = (tokenId: string) => {
+    const nft = nftListData?.data.find(n => n.tokenId === tokenId)
+    if (nft) {
+      setTransferNFT(nft)
+      setTransferModalOpen(true)
+    }
+  }
+
+  // 关闭图片查看器
+  const closeImageViewer = () => {
+    setImageViewerOpen(false)
+    setSelectedNFT(null)
+    setSelectedImageUrl("")
+  }
+
+  // 关闭转移弹窗
+  const closeTransferModal = () => {
+    setTransferModalOpen(false)
+    setTransferNFT(null)
+  }
+
+  // 格式化地址显示
+  const formatAddress = (address: string) => {
+    return `${address.slice(0, 6)}...${address.slice(-4)}`
   }
 
   return (
-    <div className="min-h-screen bg-background pt-20 pb-12">
-      <div className="container mx-auto px-4">
-        {/* 简洁标题 */}
-        <h1 className="text-3xl font-bold text-center text-foreground mb-8">作品展示</h1>
-
-        {/* 作品网格 */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {galleryItems.map((item) => (
-            <Card
-              key={item.id}
-              className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden"
-            >
-              <CardContent className="p-0">
-                {/* NFT图片区 */}
-                <div className="relative aspect-square overflow-hidden">
-                  <img
-                    src={item.image || "/placeholder.svg"}
-                    alt={item.horizontal}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="secondary" className="flex-1">
-                        <ExternalLink className="h-4 w-4 mr-1" />
-                        查看详情
-                      </Button>
-                      <Button size="sm" variant="secondary">
-                        <Share2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 春联展示区 */}
-                <div className="bg-gradient-to-b from-primary/15 to-primary/5 p-4">
-                  <div className="flex flex-col items-center">
-                    <div className="mb-3 px-4 py-1 bg-primary text-primary-foreground rounded text-sm font-bold">
-                      {item.horizontal}
-                    </div>
-                    <div className="flex gap-4">
-                      <div className="bg-primary/90 text-primary-foreground rounded px-2 py-1">
-                        {item.upper.split("").map((char, i) => (
-                          <div key={i} className="w-5 h-5 flex items-center justify-center text-xs font-brush">
-                            {char}
-                          </div>
-                        ))}
-                      </div>
-                      <div className="bg-primary/90 text-primary-foreground rounded px-2 py-1">
-                        {item.lower.split("").map((char, i) => (
-                          <div key={i} className="w-5 h-5 flex items-center justify-center text-xs font-brush">
-                            {char}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 信息区 */}
-                <div className="p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex gap-2">
-                      <Badge variant="secondary" className="text-xs">
-                        {item.style}
-                      </Badge>
-                      <Badge variant="outline" className="text-xs">
-                        {item.theme}
-                      </Badge>
-                    </div>
-                    <span className="text-xs font-mono text-muted-foreground">{item.tokenId}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="text-xs text-muted-foreground">创作者: {item.author}</div>
-                    <button
-                      onClick={() => toggleLike(item.id)}
-                      className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
-                    >
-                      <Heart className={`h-4 w-4 ${likedItems.includes(item.id) ? "fill-primary text-primary" : ""}`} />
-                      {item.likes + (likedItems.includes(item.id) ? 1 : 0)}
-                    </button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+    <div className="min-h-screen bg-gradient-to-br from-red-50 via-amber-50/30 to-red-50 dark:from-red-950/20 dark:via-amber-950/10 dark:to-red-950/20 pt-20 pb-12 relative overflow-hidden">
+      {/* 背景装饰 - 漂浮的春节元素 */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div
+          className="absolute top-20 left-10 text-4xl animate-bounce opacity-10"
+          style={{ animationDuration: "3s" }}
+        >
+          🧧
+        </div>
+        <div
+          className="absolute top-40 right-20 text-3xl animate-bounce opacity-10"
+          style={{ animationDuration: "2.5s", animationDelay: "0.5s" }}
+        >
+          🏮
+        </div>
+        <div
+          className="absolute bottom-40 left-20 text-3xl animate-bounce opacity-10"
+          style={{ animationDuration: "3.5s", animationDelay: "1s" }}
+        >
+          🎆
+        </div>
+        <div
+          className="absolute bottom-20 right-10 text-4xl animate-bounce opacity-10"
+          style={{ animationDuration: "2.8s", animationDelay: "0.3s" }}
+        >
+          🎊
+        </div>
+        <div
+          className="absolute top-1/2 left-5 text-2xl animate-pulse opacity-5"
+          style={{ animationDuration: "2s" }}
+        >
+          ✨
+        </div>
+        <div
+          className="absolute top-1/3 right-5 text-2xl animate-pulse opacity-5"
+          style={{ animationDuration: "2.2s" }}
+        >
+          ✨
         </div>
       </div>
+
+      <div className="container mx-auto px-4 relative z-10">
+        {/* 页面标题和统计 */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center gap-3 mb-4">
+            <span
+              className="text-3xl animate-bounce"
+              style={{ animationDuration: "1s" }}
+            >
+              🏮
+            </span>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-red-500 via-amber-500 to-red-500 bg-clip-text text-transparent bg-[length:200%_auto] animate-shimmer">
+              春联NFT画廊
+            </h1>
+            <span
+              className="text-3xl animate-bounce"
+              style={{ animationDuration: "1s", animationDelay: "0.5s" }}
+            >
+              🏮
+            </span>
+          </div>
+          <div className="flex items-center justify-center gap-4 text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="border-red-500/50 text-red-600 dark:text-red-400 bg-red-50/50 dark:bg-red-950/30">
+                {totalSupplyLoading ? (
+                  <Skeleton className="h-4 w-8" />
+                ) : (
+                  `总计 ${totalSupply || 0} 个NFT`
+                )}
+              </Badge>
+            </div>
+          </div>
+        </div>
+
+        {/* 工具栏 */}
+        <div className="mb-8 space-y-4">
+          <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+            {/* 搜索框 */}
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-red-400/60 h-4 w-4" />
+              <Input
+                placeholder="搜索创作者地址..."
+                value={searchTerm}
+                onChange={(e) => handleSearch(e.target.value)}
+                className="pl-10 bg-red-50/50 dark:bg-red-950/20 border-red-500/20 hover:border-red-500/40 text-foreground placeholder:text-muted-foreground"
+              />
+            </div>
+
+            {/* 控制按钮组 */}
+            <div className="flex items-center gap-2">
+              {/* 排序选择 */}
+              <Select value={sortBy} onValueChange={handleSortChange}>
+                <SelectTrigger className="w-32 bg-red-50/50 dark:bg-red-950/20 border-red-500/20 hover:border-red-500/40 text-foreground">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-background border-red-500/20">
+                  <SelectItem value="newest">最新</SelectItem>
+                  <SelectItem value="oldest">最早</SelectItem>
+                  <SelectItem value="mostLiked">最受欢迎</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {/* 视图模式切换 */}
+              <div className="flex rounded-lg bg-red-50/50 dark:bg-red-950/20 border border-red-500/20 p-1">
+                <Button
+                  variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('grid')}
+                  className={`h-8 w-8 p-0 ${viewMode === 'grid' ? 'bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600' : 'hover:bg-red-100 dark:hover:bg-red-900/30'}`}
+                >
+                  <Grid3X3 className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant={viewMode === 'list' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('list')}
+                  className={`h-8 w-8 p-0 ${viewMode === 'list' ? 'bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600' : 'hover:bg-red-100 dark:hover:bg-red-900/30'}`}
+                >
+                  <List className="h-4 w-4" />
+                </Button>
+              </div>
+
+              {/* 刷新按钮 */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="border-red-500/20 hover:border-red-500/40 text-foreground hover:bg-red-50 dark:hover:bg-red-950/30"
+              >
+                <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* 错误状态 */}
+        {error && (
+          <Alert className="mb-8 border-red-500/50 bg-red-50/50 dark:bg-red-950/20">
+            <AlertCircle className="h-4 w-4 text-red-500" />
+            <AlertDescription className="text-red-700 dark:text-red-300">
+              加载NFT数据时出错: {error.message}
+              <Button 
+                variant="link" 
+                size="sm" 
+                onClick={handleRefresh}
+                className="ml-2 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+              >
+                重试
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* NFT网格/列表 */}
+        {isLoading ? (
+          <NFTGridSkeleton count={pageSize} viewMode={viewMode} />
+        ) : nftListData?.data.length === 0 ? (
+          <div className="text-center py-16">
+            <div className="text-6xl mb-4">🎨</div>
+            <h3 className="text-xl font-semibold text-foreground mb-2">暂无NFT作品</h3>
+            <p className="text-muted-foreground mb-6">
+              {searchTerm ? '没有找到匹配的NFT作品' : '还没有人铸造春联NFT'}
+            </p>
+            {searchTerm && (
+              <Button 
+                variant="outline" 
+                onClick={() => handleSearch('')}
+                className="border-red-500/20 hover:border-red-500/40 text-foreground hover:bg-red-50 dark:hover:bg-red-950/30"
+              >
+                清除搜索
+              </Button>
+            )}
+          </div>
+        ) : (
+          <>
+            {/* NFT网格 */}
+            <div className={`grid gap-6 mb-8 ${
+              viewMode === 'grid' 
+                ? 'sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
+                : 'grid-cols-1 max-w-4xl mx-auto'
+            }`}>
+              {nftListData?.data.map((nft) => (
+                <NFTCard
+                  key={nft.tokenId}
+                  nft={nft}
+                  viewMode={viewMode}
+                  onImageClick={(imageUrl) => handleImageClick(imageUrl, nft)}
+                  onTransferClick={handleTransferClick}
+                />
+              ))}
+            </div>
+
+            {/* 分页控制 */}
+            {nftListData && nftListData.pagination.totalPages > 1 && (
+              <div className="flex justify-center">
+                <Pagination
+                  currentPage={nftListData.pagination.page}
+                  totalPages={nftListData.pagination.totalPages}
+                  onPageChange={handlePageChange}
+                  showQuickJumper
+                  className="text-foreground"
+                />
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* 图片查看器 */}
+      <ImageViewer
+        isOpen={imageViewerOpen}
+        onClose={closeImageViewer}
+        nft={selectedNFT}
+        imageUrl={selectedImageUrl}
+      />
+
+      {/* 转移弹窗 */}
+      <TransferModal
+        isOpen={transferModalOpen}
+        onClose={closeTransferModal}
+        nft={transferNFT}
+      />
     </div>
   )
 }
