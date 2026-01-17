@@ -1,13 +1,11 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useRef, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-
 import { Sparkles, RefreshCw, ImageIcon, Coins, Download, Shuffle, Star } from "lucide-react"
 import { useWallet } from "@/components/providers/wallet-provider"
 
@@ -138,10 +136,43 @@ export default function CreatePage() {
     upper: string
     lower: string
     horizontal: string
+    explanation?: string
   } | null>(null)
 
   const [generatedImage, setGeneratedImage] = useState<string | null>(null)
   const [mintedNFT, setMintedNFT] = useState<{ tokenId: string; txHash: string } | null>(null)
+
+  // 动态计算字符间距和字符大小 - 根据字数调整
+  const [charGap, setCharGap] = useState(8) // 默认间距 8px
+  const [charSize, setCharSize] = useState("w-9 h-9 text-lg") // 默认字符大小
+
+  // 根据春联字数动态计算字符间距和大小
+  useEffect(() => {
+    if (!couplet) return
+
+    const charCount = Math.max(couplet.upper.length, couplet.lower.length)
+    
+    // 根据字数设置不同的间距和大小
+    // 五言(5字): 8px间距, 正常大小(36px)
+    // 七言(7字): 4px间距, 正常大小(36px)
+    // 九言(9字): 0px间距, 缩小字体(32px)
+    let gap: number
+    let size: string
+    
+    if (charCount <= 5) {
+      gap = 8
+      size = "w-9 h-9 text-lg"
+    } else if (charCount <= 7) {
+      gap = 4
+      size = "w-9 h-9 text-lg"
+    } else {
+      gap = 0
+      size = "w-8 h-8 text-base" // 缩小字符
+    }
+    
+    setCharGap(gap)
+    setCharSize(size)
+  }, [couplet])
 
   const generateCouplet = async () => {
     setIsGenerating(true)
@@ -149,31 +180,111 @@ export default function CreatePage() {
     setGeneratedImage(null)
     setMintedNFT(null)
 
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-
-    const key = `${style}-${theme}-${wordCount}`
-    let result = mockCouplets[key] || mockCouplets["default"]
-
-    if (isAcrostic && acrosticName.length >= 2) {
-      const chars = acrosticName.split("")
-      result = {
-        upper: chars[0] + result.upper.slice(1),
-        lower: chars[1] ? chars[1] + result.lower.slice(1) : result.lower,
-        horizontal: result.horizontal,
+    try {
+      // 构建请求参数 - 映射前端配置到 API 格式
+      const zodiacItem = zodiacYears.find(z => z.value === zodiac)
+      const styleItem = styles.find(s => s.value === style)
+      const themeItem = themes.find(t => t.value === theme)
+      const toneItem = tones.find(t => t.value === tone)
+      
+      const requestBody = {
+        zodiac: zodiacItem?.label || "🐍 蛇年",
+        wordCount: wordCount === "5" ? "五言" : wordCount === "7" ? "七言" : "九言",
+        style: styleItem?.label || "传统典雅",
+        theme: themeItem?.label || "万事如意",
+        atmosphere: toneItem?.label || "活泼",
+        ...(isAcrostic && acrosticName.length >= 2 && {
+          isAcrostic: true,
+          acrosticText: acrosticName,
+        }),
       }
-    }
 
-    setCouplet(result)
-    setIsGenerating(false)
+      // 调用 API 生成春联
+      const response = await fetch("/api/couplet/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "生成失败")
+      }
+
+      // 设置生成的春联结果（包含解释）
+      setCouplet({
+        upper: data.data.upper,
+        lower: data.data.lower,
+        horizontal: data.data.horizontal,
+        explanation: data.data.explanation,
+      })
+    } catch (error) {
+      console.error("生成春联失败：", error)
+      // 显示错误提示
+      alert(error instanceof Error ? error.message : "生成失败，请稍后重试")
+      
+      // 如果失败，使用 mock 数据作为降级方案
+      const key = `${style}-${theme}-${wordCount}`
+      let result = mockCouplets[key] || mockCouplets["default"]
+      
+      if (isAcrostic && acrosticName.length >= 2) {
+        const chars = acrosticName.split("")
+        result = {
+          upper: chars[0] + result.upper.slice(1),
+          lower: chars[1] ? chars[1] + result.lower.slice(1) : result.lower,
+          horizontal: result.horizontal,
+        }
+      }
+      
+      setCouplet({
+        ...result,
+        explanation: "由于网络问题，这是一副示例春联。请检查网络连接后重试。"
+      })
+    } finally {
+      setIsGenerating(false)
+    }
   }
 
   const generateImage = async () => {
     if (!couplet) return
     setIsGeneratingImage(true)
+    setGeneratedImage(null)
 
-    await new Promise((resolve) => setTimeout(resolve, 3000))
-    setGeneratedImage("/chinese-new-year-blessing-couplet-red-gold-traditi.jpg")
-    setIsGeneratingImage(false)
+    try {
+      // 调用图片生成 API
+      const response = await fetch("/api/couplet/image", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          upper: couplet.upper,
+          lower: couplet.lower,
+          horizontal: couplet.horizontal,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "图片生成失败")
+      }
+
+      // 设置生成的图片URL
+      setGeneratedImage(data.data.imageUrl)
+    } catch (error) {
+      console.error("生成春联图片失败：", error)
+      // 显示错误提示
+      alert(error instanceof Error ? error.message : "图片生成失败，请稍后重试")
+      
+      // 如果失败，使用示例图片作为降级方案
+      setGeneratedImage("/chinese-new-year-blessing-couplet-red-gold-traditi.jpg")
+    } finally {
+      setIsGeneratingImage(false)
+    }
   }
 
   const mintNFT = async () => {
@@ -186,12 +297,6 @@ export default function CreatePage() {
       txHash: "0x" + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join(""),
     })
     setIsMinting(false)
-  }
-
-  const resetAll = () => {
-    setCouplet(null)
-    setGeneratedImage(null)
-    setMintedNFT(null)
   }
 
   if (!isConnected) {
@@ -279,6 +384,17 @@ export default function CreatePage() {
               <div className="w-3 h-5 bg-gradient-to-b from-red-500 to-red-600 rounded-full shadow-md shadow-red-500/50" />
               <div className="w-3 h-5 bg-gradient-to-b from-red-500 to-red-600 rounded-full shadow-md shadow-red-500/50" />
             </div>
+
+            {/* 底部装饰 - 祥云图案 - 绝对定位 */}
+            <div className="absolute bottom-6 left-5 right-5 flex justify-center items-center gap-2">
+              <div className="h-px flex-1 bg-gradient-to-r from-transparent via-red-400/50 to-transparent" />
+              <div className="flex gap-1">
+                <div className="w-1.5 h-1.5 rounded-full bg-red-400/60" />
+                <div className="w-1.5 h-1.5 rounded-full bg-amber-400/60" />
+                <div className="w-1.5 h-1.5 rounded-full bg-red-400/60" />
+              </div>
+              <div className="h-px flex-1 bg-gradient-to-r from-transparent via-red-400/50 to-transparent" />
+            </div>
             
             <CardHeader className="pb-2 border-b border-red-300/40 dark:border-red-500/20 mt-2">
               <CardTitle className="flex flex-col items-center gap-1">
@@ -288,7 +404,7 @@ export default function CreatePage() {
                 <p className="text-sm text-muted-foreground">定制您的专属春联</p>
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4 pt-4 px-5">
+            <CardContent className="space-y-4 pt-4 px-5 pb-20">
               {/* 随机灵感按钮 - 置顶显示 */}
               <Button
                 variant="outline"
@@ -511,10 +627,10 @@ export default function CreatePage() {
                 </div>
               </div>
 
-              {/* 生成按钮 */}
-              <div className="flex gap-2 pt-2">
+              {/* 生成按钮 - 绝对定位 */}
+              <div className="absolute bottom-12 left-5 right-5">
                 <Button
-                  className="flex-1 gap-2 h-14 text-base font-bold bg-gradient-to-r from-red-600 via-red-500 to-amber-500 hover:from-red-700 hover:via-red-600 hover:to-amber-600 shadow-xl shadow-red-500/40 transition-all duration-300 rounded-2xl border-3 border-red-400/50 hover:scale-[1.02] active:scale-[0.98]"
+                  className="w-full gap-2 h-14 text-base font-bold bg-gradient-to-r from-red-600 via-red-500 to-amber-500 hover:from-red-700 hover:via-red-600 hover:to-amber-600 shadow-xl shadow-red-500/40 transition-all duration-300 rounded-2xl border-3 border-red-400/50 hover:scale-[1.02] active:scale-[0.98]"
                   onClick={generateCouplet}
                   disabled={isGenerating}
                 >
@@ -531,34 +647,6 @@ export default function CreatePage() {
                     </>
                   )}
                 </Button>
-                {couplet && (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={resetAll}
-                          className="h-12 w-12 bg-background/80 border-2 border-red-500/30 hover:bg-red-500/10 hover:border-red-500 shadow-lg rounded-xl transition-all hover:rotate-180 duration-500"
-                        >
-                          <RefreshCw className="h-5 w-5" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>重新开始</TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                )}
-              </div>
-
-              {/* 底部装饰 - 祥云图案 */}
-              <div className="flex justify-center items-center gap-2 pt-2 pb-1">
-                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-red-400/50 to-transparent" />
-                <div className="flex gap-1">
-                  <div className="w-1.5 h-1.5 rounded-full bg-red-400/60" />
-                  <div className="w-1.5 h-1.5 rounded-full bg-amber-400/60" />
-                  <div className="w-1.5 h-1.5 rounded-full bg-red-400/60" />
-                </div>
-                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-red-400/50 to-transparent" />
               </div>
             </CardContent>
           </Card>
@@ -589,6 +677,17 @@ export default function CreatePage() {
               <div className="w-3 h-5 bg-gradient-to-b from-red-500 to-red-600 rounded-full shadow-md shadow-red-500/50" />
               <div className="w-3 h-5 bg-gradient-to-b from-red-500 to-red-600 rounded-full shadow-md shadow-red-500/50" />
             </div>
+
+            {/* 底部装饰 - 祥云图案 - 绝对定位 */}
+            <div className="absolute bottom-6 left-5 right-5 flex justify-center items-center gap-2">
+              <div className="h-px flex-1 bg-gradient-to-r from-transparent via-red-400/50 to-transparent" />
+              <div className="flex gap-1">
+                <div className="w-1.5 h-1.5 rounded-full bg-red-400/60" />
+                <div className="w-1.5 h-1.5 rounded-full bg-amber-400/60" />
+                <div className="w-1.5 h-1.5 rounded-full bg-red-400/60" />
+              </div>
+              <div className="h-px flex-1 bg-gradient-to-r from-transparent via-red-400/50 to-transparent" />
+            </div>
             
             <CardHeader className="pb-2 border-b border-red-300/40 dark:border-red-500/20 mt-2">
               <CardTitle className="flex flex-col items-center gap-1">
@@ -598,7 +697,7 @@ export default function CreatePage() {
                 <p className="text-sm text-muted-foreground">AI智能创作展示</p>
               </CardTitle>
             </CardHeader>
-            <CardContent className="pt-4 px-5">
+            <CardContent className="pt-4 px-5 pb-20">
               {isGenerating ? (
                 <div className="flex flex-col items-center justify-center py-16">
                   <div className="relative">
@@ -608,48 +707,100 @@ export default function CreatePage() {
                   <p className="mt-4 text-sm text-muted-foreground">AI正在创作中...</p>
                 </div>
               ) : couplet ? (
-                <div className="flex flex-col items-center py-6">
-                  <div className="mb-8 px-8 py-3 horizontal-scroll rounded-lg">
-                    <span className="text-2xl font-brush text-shimmer tracking-[0.5em]">{couplet.horizontal}</span>
+                <div className="flex flex-col items-center py-4">
+                  <div className="mb-4 px-6 py-2 horizontal-scroll rounded-lg">
+                    <span className="text-xl font-brush text-shimmer tracking-[0.3em]">{couplet.horizontal}</span>
                   </div>
 
-                  <div className="flex justify-center gap-12">
+                  <div className="flex justify-center gap-6">
                     {/* 上联 */}
                     <div className="flex flex-col items-center">
-                      <div className="couplet-paper rounded-lg p-4 space-y-1">
-                        {couplet.upper.split("").map((char, i) => (
-                          <div
-                            key={i}
-                            className="w-12 h-12 flex items-center justify-center text-2xl font-brush text-gold couplet-char animate-char-appear"
-                            style={{ animationDelay: `${i * 0.1}s` }}
-                          >
-                            {char}
-                          </div>
-                        ))}
+                      <div className="couplet-paper rounded-lg p-2">
+                        <div className="flex flex-col" style={{ gap: `${charGap}px` }}>
+                          {couplet.upper.split("").map((char, i) => (
+                            <div
+                              key={i}
+                              className={`${charSize} flex items-center justify-center font-brush text-gold couplet-char animate-char-appear`}
+                              style={{ animationDelay: `${i * 0.1}s` }}
+                            >
+                              {char}
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                      <span className="mt-3 text-xs text-muted-foreground">上联</span>
+                      <span className="mt-2 text-xs text-muted-foreground">上联</span>
                     </div>
 
                     {/* 下联 */}
                     <div className="flex flex-col items-center">
-                      <div className="couplet-paper rounded-lg p-4 space-y-1">
-                        {couplet.lower.split("").map((char, i) => (
-                          <div
-                            key={i}
-                            className="w-12 h-12 flex items-center justify-center text-2xl font-brush text-gold couplet-char animate-char-appear"
-                            style={{ animationDelay: `${(i + couplet.upper.length) * 0.1}s` }}
-                          >
-                            {char}
-                          </div>
-                        ))}
+                      <div className="couplet-paper rounded-lg p-2">
+                        <div className="flex flex-col" style={{ gap: `${charGap}px` }}>
+                          {couplet.lower.split("").map((char, i) => (
+                            <div
+                              key={i}
+                              className={`${charSize} flex items-center justify-center font-brush text-gold couplet-char animate-char-appear`}
+                              style={{ animationDelay: `${(i + couplet.upper.length) * 0.1}s` }}
+                            >
+                              {char}
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                      <span className="mt-3 text-xs text-muted-foreground">下联</span>
+                      <span className="mt-2 text-xs text-muted-foreground">下联</span>
                     </div>
                   </div>
 
-                  {/* 生成图片按钮 */}
+                  {/* 春联解释说明 - 悬停展开（向上弹出） */}
+                  {couplet.explanation && (
+                    <div className="mt-4 w-full relative group">
+                      {/* 折叠状态 - 提示标识 */}
+                      <div className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 border-2 border-dashed border-amber-400/60 dark:border-amber-600/60 cursor-help transition-all duration-300 group-hover:border-solid group-hover:shadow-lg">
+                        <span className="text-lg">📖</span>
+                        <span className="text-sm font-medium text-amber-800 dark:text-amber-200">创作解释</span>
+                        <span className="text-xs text-amber-600 dark:text-amber-400 animate-pulse">(悬停查看)</span>
+                      </div>
+                      
+                      {/* 悬停展开的详细内容 - 向上弹出，适中宽度避免超出边框 */}
+                      <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-[95%] max-w-xl opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto transition-all duration-300 z-20">
+                        <div className="p-5 rounded-lg bg-white dark:bg-gray-800 border-2 border-amber-400/80 dark:border-amber-600/80 shadow-2xl">
+                          <div className="flex items-start gap-3">
+                            <span className="text-xl mt-0.5 flex-shrink-0">💡</span>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="text-base font-bold text-amber-900 dark:text-amber-100 mb-3 flex items-center gap-2">
+                                创作解释
+                                <span className="text-xs font-normal text-muted-foreground">(详细说明)</span>
+                              </h3>
+                              <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">
+                                {couplet.explanation}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        {/* 向下的三角箭头指示器 */}
+                        <div className="absolute left-1/2 -translate-x-1/2 -bottom-2 w-4 h-4 bg-white dark:bg-gray-800 border-r-2 border-b-2 border-amber-400/80 dark:border-amber-600/80 rotate-45"></div>
+                      </div>
+                    </div>
+                  )}
+
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                  <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mb-4">
+                    <span className="text-4xl font-brush opacity-30">福</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    配置好选项后
+                    <br />
+                    点击"生成春联"开始创作
+                  </p>
+                </div>
+              )}
+              
+              {/* 生成图片按钮 - 绝对定位 */}
+              {couplet && (
+                <div className="absolute bottom-12 left-5 right-5">
                   <Button
-                    className="mt-8 gap-2 h-14 text-base font-bold bg-gradient-to-r from-red-600 via-red-500 to-amber-500 hover:from-red-700 hover:via-red-600 hover:to-amber-600 shadow-xl shadow-red-500/40 transition-all duration-300 rounded-2xl border-3 border-red-400/50 hover:scale-[1.02] active:scale-[0.98]"
+                    className="w-full gap-2 h-14 text-base font-bold bg-gradient-to-r from-red-600 via-red-500 to-amber-500 hover:from-red-700 hover:via-red-600 hover:to-amber-600 shadow-xl shadow-red-500/40 transition-all duration-300 rounded-2xl border-3 border-red-400/50 hover:scale-[1.02] active:scale-[0.98]"
                     onClick={generateImage}
                     disabled={isGeneratingImage || !!generatedImage}
                   >
@@ -672,17 +823,6 @@ export default function CreatePage() {
                       </>
                     )}
                   </Button>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-16 text-center">
-                  <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mb-4">
-                    <span className="text-4xl font-brush opacity-30">福</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    配置好选项后
-                    <br />
-                    点击"生成春联"开始创作
-                  </p>
                 </div>
               )}
             </CardContent>
@@ -714,6 +854,17 @@ export default function CreatePage() {
               <div className="w-3 h-5 bg-gradient-to-b from-red-500 to-red-600 rounded-full shadow-md shadow-red-500/50" />
               <div className="w-3 h-5 bg-gradient-to-b from-red-500 to-red-600 rounded-full shadow-md shadow-red-500/50" />
             </div>
+
+            {/* 底部装饰 - 祥云图案 - 绝对定位 */}
+            <div className="absolute bottom-6 left-5 right-5 flex justify-center items-center gap-2">
+              <div className="h-px flex-1 bg-gradient-to-r from-transparent via-red-400/50 to-transparent" />
+              <div className="flex gap-1">
+                <div className="w-1.5 h-1.5 rounded-full bg-red-400/60" />
+                <div className="w-1.5 h-1.5 rounded-full bg-amber-400/60" />
+                <div className="w-1.5 h-1.5 rounded-full bg-red-400/60" />
+              </div>
+              <div className="h-px flex-1 bg-gradient-to-r from-transparent via-red-400/50 to-transparent" />
+            </div>
             
             <CardHeader className="pb-2 border-b border-red-300/40 dark:border-red-500/20 mt-2">
               <CardTitle className="flex flex-col items-center gap-1">
@@ -723,7 +874,7 @@ export default function CreatePage() {
                 <p className="text-sm text-muted-foreground">精美春联图片展示</p>
               </CardTitle>
             </CardHeader>
-            <CardContent className="pt-4 px-5">
+            <CardContent className="pt-4 px-5 pb-20">
               {generatedImage ? (
                 <div className="space-y-4">
                   {/* 生成的图片 */}
@@ -738,27 +889,6 @@ export default function CreatePage() {
                       下载
                     </Button>
                   </div>
-
-                  {!mintedNFT && (
-                    <Button
-                      className="w-full gap-2 h-14 text-base font-bold bg-gradient-to-r from-red-600 via-red-500 to-amber-500 hover:from-red-700 hover:via-red-600 hover:to-amber-600 shadow-xl shadow-red-500/40 transition-all duration-300 rounded-2xl border-3 border-red-400/50 hover:scale-[1.02] active:scale-[0.98]"
-                      onClick={mintNFT}
-                      disabled={isMinting}
-                    >
-                      {isMinting ? (
-                        <>
-                          <RefreshCw className="h-5 w-5 animate-spin" />
-                          铸造中...
-                        </>
-                      ) : (
-                        <>
-                          <span className="text-xl">💎</span>
-                          铸造为NFT
-                          <Coins className="h-5 w-5" />
-                        </>
-                      )}
-                    </Button>
-                  )}
 
                   {/* NFT信息 */}
                   {mintedNFT && (
@@ -798,6 +928,30 @@ export default function CreatePage() {
                     <br />
                     点击"生成春联图片"创建精美图片
                   </p>
+                </div>
+              )}
+              
+              {/* 铸造NFT按钮 - 绝对定位 */}
+              {generatedImage && !mintedNFT && (
+                <div className="absolute bottom-12 left-5 right-5">
+                  <Button
+                    className="w-full gap-2 h-14 text-base font-bold bg-gradient-to-r from-red-600 via-red-500 to-amber-500 hover:from-red-700 hover:via-red-600 hover:to-amber-600 shadow-xl shadow-red-500/40 transition-all duration-300 rounded-2xl border-3 border-red-400/50 hover:scale-[1.02] active:scale-[0.98]"
+                    onClick={mintNFT}
+                    disabled={isMinting}
+                  >
+                    {isMinting ? (
+                      <>
+                        <RefreshCw className="h-5 w-5 animate-spin" />
+                        铸造中...
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-xl">💎</span>
+                        铸造为NFT
+                        <Coins className="h-5 w-5" />
+                      </>
+                    )}
+                  </Button>
                 </div>
               )}
             </CardContent>
