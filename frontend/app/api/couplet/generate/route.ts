@@ -1,14 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-  generateCouplet,
-  type CoupletConfig,
-} from "@/lib/couplet-generator";
+import { generateCouplet, type CoupletConfig } from "@/lib/couplet-generator";
 
 /**
  * POST /api/couplet/generate
- * 
+ *
  * 生成春联 API
- * 
+ *
  * 请求体：CoupletConfig
  * {
  *   zodiac: string;
@@ -19,7 +16,7 @@ import {
  *   isAcrostic?: boolean;
  *   acrosticText?: string;
  * }
- * 
+ *
  * 响应：
  * {
  *   success: boolean;
@@ -143,7 +140,7 @@ export async function POST(request: NextRequest) {
 
 /**
  * GET /api/couplet/generate
- * 
+ *
  * 获取 API 使用说明
  */
 export async function GET() {
@@ -154,7 +151,7 @@ export async function GET() {
     method: "POST",
     endpoint: "/api/couplet/generate",
     requestBody: {
-      zodiac: "生肖（如：🐍 蛇年）",
+      zodiac: "生肖（如：🐎 马年）",
       wordCount: "字数（五言 | 七言 | 九言）",
       style: "创作风格（如：传统典雅、现代简约、幽默搞笑、文艺清新）",
       theme: "祝福主题（如：万事如意、财源广进、事业顺利）",
@@ -174,7 +171,7 @@ export async function GET() {
     },
     example: {
       request: {
-        zodiac: "🐍 蛇年",
+        zodiac: "🐎 马年",
         wordCount: "七言",
         style: "传统典雅",
         theme: "万事如意",

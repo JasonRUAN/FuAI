@@ -1,12 +1,10 @@
 "use client"
 
 import Link from "next/link"
-import { useWallet } from "@/components/providers/wallet-provider"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Sparkles } from "lucide-react"
 
 export function HeroSection() {
-  const { isConnected, connect, isConnecting } = useWallet()
 
   return (
     <section className="relative overflow-hidden py-20 md:py-32">
@@ -53,33 +51,12 @@ export function HeroSection() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            {isConnected ? (
-              <Button size="lg" asChild className="gap-2 bg-primary hover:bg-primary/90 text-lg px-8 py-6">
-                <Link href="/create">
-                  <span>开始创作</span>
-                  <ArrowRight className="h-5 w-5" />
-                </Link>
-              </Button>
-            ) : (
-              <Button
-                size="lg"
-                onClick={connect}
-                disabled={isConnecting}
-                className="gap-2 bg-primary hover:bg-primary/90 text-lg px-8 py-6"
-              >
-                {isConnecting ? (
-                  <>
-                    <Sparkles className="h-5 w-5 animate-spin" />
-                    <span>连接中...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>连接钱包开始</span>
-                    <ArrowRight className="h-5 w-5" />
-                  </>
-                )}
-              </Button>
-            )}
+            <Button size="lg" asChild className="gap-2 bg-primary hover:bg-primary/90 text-lg px-8 py-6">
+              <Link href="/create">
+                <span>开始创作</span>
+                <ArrowRight className="h-5 w-5" />
+              </Link>
+            </Button>
             <Button variant="outline" size="lg" className="text-lg px-8 py-6 bg-transparent">
               了解更多
             </Button>

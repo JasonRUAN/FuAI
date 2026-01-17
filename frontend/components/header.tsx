@@ -2,12 +2,11 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useWallet } from "@/components/providers/wallet-provider"
-import { Button } from "@/components/ui/button"
-import { Wallet, LogOut, Sparkles } from "lucide-react"
+import { ConnectKitButton } from "connectkit"
+import { useAccount } from "wagmi"
 
 export function Header() {
-  const { address, isConnected, isConnecting, connect, disconnect } = useWallet()
+  const { address, isConnected } = useAccount()
   const pathname = usePathname()
 
   const formatAddress = (addr: string) => {
@@ -73,41 +72,18 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-2">
-          {isConnected ? (
-            <div className="flex items-center gap-2">
-              <div className="hidden sm:flex items-center gap-2 rounded-full bg-red-700/50 border border-yellow-500/30 px-3 py-1.5">
-                <div className="h-2 w-2 rounded-full bg-green-400 animate-pulse shadow-lg shadow-green-400/50" />
-                <span className="text-sm font-medium text-yellow-200">{formatAddress(address!)}</span>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={disconnect}
-                className="gap-2 bg-transparent border-yellow-500/50 text-yellow-200 hover:bg-red-700/50 hover:text-yellow-300 hover:border-yellow-400"
-              >
-                <LogOut className="h-4 w-4" />
-                <span className="hidden sm:inline">断开</span>
-              </Button>
-            </div>
-          ) : (
-            <Button
-              onClick={connect}
-              disabled={isConnecting}
-              className="gap-2 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-red-900 font-semibold shadow-lg shadow-yellow-500/30 border-0"
-            >
-              {isConnecting ? (
-                <>
-                  <Sparkles className="h-4 w-4 animate-spin" />
-                  <span>连接中...</span>
-                </>
-              ) : (
-                <>
-                  <Wallet className="h-4 w-4" />
-                  <span>连接钱包</span>
-                </>
-              )}
-            </Button>
-          )}
+          <ConnectKitButton
+            customTheme={{
+              "--ck-connectbutton-font-size": "16px",
+              "--ck-connectbutton-border-radius": "8px",
+              "--ck-connectbutton-background": "linear-gradient(to right, rgb(234, 179, 8), rgb(202, 138, 4))",
+              "--ck-connectbutton-color": "rgb(127, 29, 29)",
+              "--ck-connectbutton-hover-background":
+                "linear-gradient(to right, rgb(250, 204, 21), rgb(234, 179, 8))",
+              "--ck-connectbutton-active-background":
+                "linear-gradient(to right, rgb(202, 138, 4), rgb(161, 98, 7))",
+            }}
+          />
         </div>
       </div>
 

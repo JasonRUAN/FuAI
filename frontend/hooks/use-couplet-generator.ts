@@ -16,14 +16,14 @@ interface UseCoupletGeneratorReturn {
 
 /**
  * 春联生成器 Hook
- * 
+ *
  * @example
  * ```tsx
  * const { result, loading, error, generate } = useCoupletGenerator();
- * 
+ *
  * const handleGenerate = async () => {
  *   await generate({
- *     zodiac: "🐍 蛇年",
+ *     zodiac: "🐎 马年",
  *     wordCount: "七言",
  *     style: "传统典雅",
  *     theme: "万事如意",
@@ -102,14 +102,14 @@ interface UseBatchCoupletGeneratorReturn {
 
 /**
  * 批量春联生成器 Hook
- * 
+ *
  * @example
  * ```tsx
  * const { results, loading, error, generateBatch } = useBatchCoupletGenerator();
- * 
+ *
  * const handleGenerate = async () => {
  *   await generateBatch({
- *     zodiac: "🐍 蛇年",
+ *     zodiac: "🐎 马年",
  *     wordCount: "七言",
  *     style: "传统典雅",
  *     theme: "万事如意",

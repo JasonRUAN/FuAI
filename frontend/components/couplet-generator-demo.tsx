@@ -6,7 +6,7 @@ import type { CoupletConfig } from "@/lib/couplet-generator";
 
 /**
  * 春联生成器演示组件
- * 
+ *
  * 这是一个完整的示例组件，展示如何使用春联生成器
  */
 export function CoupletGeneratorDemo() {
@@ -14,7 +14,7 @@ export function CoupletGeneratorDemo() {
 
   // 表单状态
   const [config, setConfig] = useState<CoupletConfig>({
-    zodiac: "🐍 蛇年",
+    zodiac: "🐎 马年",
     wordCount: "七言",
     style: "传统典雅",
     theme: "万事如意",
@@ -34,7 +34,10 @@ export function CoupletGeneratorDemo() {
       </div>
 
       {/* 配置表单 */}
-      <form onSubmit={handleSubmit} className="space-y-4 bg-white p-6 rounded-lg shadow">
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-4 bg-white p-6 rounded-lg shadow"
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* 生肖 */}
           <div>
@@ -44,7 +47,7 @@ export function CoupletGeneratorDemo() {
               value={config.zodiac}
               onChange={(e) => setConfig({ ...config, zodiac: e.target.value })}
               className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-red-500"
-              placeholder="如：🐍 蛇年"
+              placeholder="如：🐎 马年"
             />
           </div>
 
@@ -156,7 +159,9 @@ export function CoupletGeneratorDemo() {
           {/* 解释 */}
           <div className="bg-white p-6 rounded-lg shadow-md">
             <p className="text-gray-700 font-medium mb-2">📖 创作解释</p>
-            <p className="text-gray-600 leading-relaxed">{result.explanation}</p>
+            <p className="text-gray-600 leading-relaxed">
+              {result.explanation}
+            </p>
           </div>
 
           {/* 操作按钮 */}

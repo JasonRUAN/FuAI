@@ -5,6 +5,7 @@ import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 import { WalletProvider } from "@/components/providers/wallet-provider"
 import { Header } from "@/components/header"
+import { Toaster } from "@/components/ui/sonner"
 
 const zcoolKuaiLe = ZCOOL_KuaiLe({
   subsets: ["latin"],
@@ -59,6 +60,7 @@ export default function RootLayout({
         <WalletProvider>
           <Header />
           {children}
+          <Toaster />
         </WalletProvider>
         <Analytics />
       </body>

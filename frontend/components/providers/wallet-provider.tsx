@@ -1,53 +1,38 @@
 "use client"
 
-import { createContext, useContext, useState, useCallback, type ReactNode } from "react"
+import { WagmiProvider, createConfig, http } from "wagmi"
+import { monadTestnet } from "wagmi/chains"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { ConnectKitProvider, getDefaultConfig } from "connectkit"
 
-interface WalletContextType {
-  address: string | null
-  isConnected: boolean
-  isConnecting: boolean
-  connect: () => Promise<void>
-  disconnect: () => void
-}
+const config = createConfig(
+  getDefaultConfig({
+    // Your dApps chains
+    chains: [monadTestnet],
+    transports: {
+      // RPC URL for each chain
+      [monadTestnet.id]: http(`https://testnet-rpc.monad.xyz/`),
+    },
 
-const WalletContext = createContext<WalletContextType | undefined>(undefined)
+    // Required API Keys
+    walletConnectProjectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID!,
 
-export function WalletProvider({ children }: { children: ReactNode }) {
-  const [address, setAddress] = useState<string | null>(null)
-  const [isConnecting, setIsConnecting] = useState(false)
+    // Required App Info
+    appName: "FuAI",
+    appDescription: "基于大语言模型的智能春节文化内容生成区块链Dapp",
+    appUrl: "https://fuai.app",
+    appIcon: "https://fuai.app/icon.svg",
+  })
+)
 
-  const connect = useCallback(async () => {
-    setIsConnecting(true)
-    // Mock钱包连接 - 后续替换为真实实现
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-    const mockAddress = "0x" + Array.from({ length: 40 }, () => Math.floor(Math.random() * 16).toString(16)).join("")
-    setAddress(mockAddress)
-    setIsConnecting(false)
-  }, [])
+const queryClient = new QueryClient()
 
-  const disconnect = useCallback(() => {
-    setAddress(null)
-  }, [])
-
+export function WalletProvider({ children }: { children: React.ReactNode }) {
   return (
-    <WalletContext.Provider
-      value={{
-        address,
-        isConnected: !!address,
-        isConnecting,
-        connect,
-        disconnect,
-      }}
-    >
-      {children}
-    </WalletContext.Provider>
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={queryClient}>
+        <ConnectKitProvider>{children}</ConnectKitProvider>
+      </QueryClientProvider>
+    </WagmiProvider>
   )
-}
-
-export function useWallet() {
-  const context = useContext(WalletContext)
-  if (context === undefined) {
-    throw new Error("useWallet must be used within a WalletProvider")
-  }
-  return context
 }

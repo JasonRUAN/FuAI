@@ -5,7 +5,7 @@ import * as z from "zod";
  * 春联配置接口
  */
 export interface CoupletConfig {
-  /** 生肖（如：🐍 蛇年） */
+  /** 生肖（如：🐎 马年） */
   zodiac: string;
   /** 字数（如：五言、七言） */
   wordCount: "五言" | "七言" | "九言";
@@ -95,7 +95,15 @@ export class CoupletGenerator {
    * @returns 包含上联、下联、横批和解释的春联对象
    */
   async generate(config: CoupletConfig): Promise<CoupletResult> {
-    const { zodiac, wordCount, style, theme, atmosphere, isAcrostic, acrosticText } = config;
+    const {
+      zodiac,
+      wordCount,
+      style,
+      theme,
+      atmosphere,
+      isAcrostic,
+      acrosticText,
+    } = config;
 
     // 构建系统提示词
     const systemPrompt = `你是一位精通中国传统文化的春联创作大师，擅长根据不同风格、主题创作对仗工整、寓意吉祥的春联。
@@ -106,7 +114,9 @@ export class CoupletGenerator {
 3. 横批：通常为四字，点明主题
 4. 解释：详细说明春联的创作寓意、文化内涵、对仗技巧等（100-200字）
 
-请确保春联内容积极向上、寓意吉祥，符合中国传统文化和春节习俗。`;
+请确保春联内容积极向上、寓意吉祥，符合中国传统文化和春节习俗。
+
+重要：请以 JSON 格式返回结果，包含 upper（上联）、lower（下联）、horizontal（横批）、explanation（解释）四个字段。`;
 
     // 构建用户提示词
     let userPrompt = `请根据以下配置创作一副春联：
@@ -150,7 +160,9 @@ export class CoupletGenerator {
       return result as CoupletResult;
     } catch (error) {
       throw new Error(
-        `春联生成失败: ${error instanceof Error ? error.message : String(error)}`
+        `春联生成失败: ${
+          error instanceof Error ? error.message : String(error)
+        }`
       );
     }
   }
@@ -165,9 +177,7 @@ export class CoupletGenerator {
     config: CoupletConfig,
     count: number = 3
   ): Promise<CoupletResult[]> {
-    const promises = Array.from({ length: count }, () =>
-      this.generate(config)
-    );
+    const promises = Array.from({ length: count }, () => this.generate(config));
     return Promise.all(promises);
   }
 
@@ -176,12 +186,12 @@ export class CoupletGenerator {
    * @param customPrompt 自定义提示词
    * @returns 春联对象
    */
-  async generateWithCustomPrompt(
-    customPrompt: string
-  ): Promise<CoupletResult> {
+  async generateWithCustomPrompt(customPrompt: string): Promise<CoupletResult> {
     const systemPrompt = `你是一位精通中国传统文化的春联创作大师，擅长根据不同风格、主题创作对仗工整、寓意吉祥的春联。
 
-请根据用户的要求创作春联，并提供详细的解释说明（100-200字），包括创作寓意、文化内涵、对仗技巧等。`;
+请根据用户的要求创作春联，并提供详细的解释说明（100-200字），包括创作寓意、文化内涵、对仗技巧等。
+
+重要：请以 JSON 格式返回结果，包含 upper（上联）、lower（下联）、horizontal（横批）、explanation（解释）四个字段。`;
 
     try {
       const result = await this.modelWithStructuredOutput.invoke([
@@ -198,7 +208,9 @@ export class CoupletGenerator {
       return result as CoupletResult;
     } catch (error) {
       throw new Error(
-        `春联生成失败: ${error instanceof Error ? error.message : String(error)}`
+        `春联生成失败: ${
+          error instanceof Error ? error.message : String(error)
+        }`
       );
     }
   }
