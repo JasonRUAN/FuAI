@@ -244,12 +244,12 @@ export function NFTCard({ nft, viewMode, onImageClick, onTransferClick }: NFTCar
               </span>
             </div>
 
-            {/* 上下联（横向排列）- 自适应宽度，使用ellipsis */}
+            {/* 上下联（横向排列）- 等宽展示 */}
             <div className="flex gap-3 flex-1 min-w-0 items-center">
               {/* 上联 */}
-              <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                <span className="text-xs text-muted-foreground whitespace-nowrap">上联：</span>
-                <div className="bg-gradient-to-r from-red-600/90 to-red-700/90 text-white rounded px-3 py-2 shadow flex-1 min-w-0">
+              <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                <span className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">上联：</span>
+                <div className="bg-gradient-to-r from-red-600/90 to-red-700/90 text-white rounded px-3 py-2 shadow w-full max-w-[280px]">
                   <span 
                     className="text-sm font-bold tracking-wide block truncate" 
                     title={nft.content.upperLine}
@@ -260,9 +260,9 @@ export function NFTCard({ nft, viewMode, onImageClick, onTransferClick }: NFTCar
               </div>
 
               {/* 下联 */}
-              <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                <span className="text-xs text-muted-foreground whitespace-nowrap">下联：</span>
-                <div className="bg-gradient-to-r from-red-600/90 to-red-700/90 text-white rounded px-3 py-2 shadow flex-1 min-w-0">
+              <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                <span className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">下联：</span>
+                <div className="bg-gradient-to-r from-red-600/90 to-red-700/90 text-white rounded px-3 py-2 shadow w-full max-w-[280px]">
                   <span 
                     className="text-sm font-bold tracking-wide block truncate"
                     title={nft.content.lowerLine}
