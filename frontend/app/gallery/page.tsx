@@ -15,7 +15,8 @@ import {
   Filter,
   Grid3X3,
   List,
-  AlertCircle
+  AlertCircle,
+  UserCircle
 } from "lucide-react"
 import { useNFTList, useTotalSupply, usePreloadNextPage, useRefreshNFTData } from "@/hooks/use-nft-data"
 import { PaginationParams, NFTData } from "@/types/nft"
@@ -24,14 +25,19 @@ import { NFTGridSkeleton } from "@/components/nft/nft-grid-skeleton"
 import { ImageViewer } from "@/components/nft/image-viewer"
 import { TransferModal } from "@/components/nft/transfer-modal"
 import { Pagination } from "@/components/ui/pagination"
+import { useAccount } from "wagmi"
 
 export default function GalleryPage() {
+  // 获取当前连接的钱包地址
+  const { address: userAddress } = useAccount()
+  
   // 状态管理
   const [searchTerm, setSearchTerm] = useState("")
   const [sortBy, setSortBy] = useState<PaginationParams['sortBy']>('newest')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [currentPage, setCurrentPage] = useState(1)
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const [showMyNFTs, setShowMyNFTs] = useState(false) // 是否只显示我的NFT
   
   // 图片查看器状态
   const [imageViewerOpen, setImageViewerOpen] = useState(false)
@@ -44,12 +50,16 @@ export default function GalleryPage() {
   
   const pageSize = 20
 
-  // 查询参数
+  // 查询参数 - 根据showMyNFTs状态决定是否过滤当前用户的NFT
   const queryParams: PaginationParams = {
     page: currentPage,
     limit: pageSize,
     sortBy,
-    filterBy: searchTerm ? { owner: searchTerm } : undefined
+    filterBy: showMyNFTs && userAddress 
+      ? { owner: userAddress } 
+      : searchTerm 
+        ? { owner: searchTerm } 
+        : undefined
   }
 
   const { 
@@ -96,6 +106,13 @@ export default function GalleryPage() {
   const handleSortChange = (value: string) => {
     setSortBy(value as PaginationParams['sortBy'])
     setCurrentPage(1)
+  }
+
+  // 处理"我的NFT"切换
+  const handleMyNFTsToggle = () => {
+    setShowMyNFTs(!showMyNFTs)
+    setSearchTerm("") // 清除搜索词
+    setCurrentPage(1) // 重置到第一页
   }
 
   // 处理分页
@@ -220,15 +237,35 @@ export default function GalleryPage() {
         {/* 工具栏 */}
         <div className="mb-8 space-y-4">
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-            {/* 搜索框 */}
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-red-400/60 h-4 w-4" />
-              <Input
-                placeholder="搜索创作者地址..."
-                value={searchTerm}
-                onChange={(e) => handleSearch(e.target.value)}
-                className="pl-10 bg-red-50/50 dark:bg-red-950/20 border-red-500/20 hover:border-red-500/40 text-foreground placeholder:text-muted-foreground"
-              />
+            {/* 搜索框和过滤按钮 */}
+            <div className="flex items-center gap-2 flex-1 max-w-md">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-red-400/60 h-4 w-4" />
+                <Input
+                  placeholder="搜索创作者地址..."
+                  value={searchTerm}
+                  onChange={(e) => handleSearch(e.target.value)}
+                  disabled={showMyNFTs} // 显示我的NFT时禁用搜索
+                  className="pl-10 bg-red-50/50 dark:bg-red-950/20 border-red-500/20 hover:border-red-500/40 text-foreground placeholder:text-muted-foreground disabled:opacity-50"
+                />
+              </div>
+              
+              {/* 我的NFT过滤按钮 */}
+              <Button
+                variant={showMyNFTs ? 'default' : 'outline'}
+                size="sm"
+                onClick={handleMyNFTsToggle}
+                disabled={!userAddress}
+                className={`flex-shrink-0 ${
+                  showMyNFTs 
+                    ? 'bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600 text-white' 
+                    : 'border-red-500/20 hover:border-red-500/40 text-foreground hover:bg-red-50 dark:hover:bg-red-950/30'
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
+                title={!userAddress ? '请先连接钱包' : showMyNFTs ? '显示全部NFT' : '只看我的NFT'}
+              >
+                <UserCircle className="h-4 w-4 mr-1" />
+                我的NFT
+              </Button>
             </div>
 
             {/* 控制按钮组 */}
@@ -303,9 +340,16 @@ export default function GalleryPage() {
         ) : nftListData?.data.length === 0 ? (
           <div className="text-center py-16">
             <div className="text-6xl mb-4">🎨</div>
-            <h3 className="text-xl font-semibold text-foreground mb-2">暂无NFT作品</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-2">
+              {showMyNFTs ? '您还没有春联NFT' : '暂无NFT作品'}
+            </h3>
             <p className="text-muted-foreground mb-6">
-              {searchTerm ? '没有找到匹配的NFT作品' : '还没有人铸造春联NFT'}
+              {showMyNFTs 
+                ? '快去创建您的第一个春联NFT吧！' 
+                : searchTerm 
+                  ? '没有找到匹配的NFT作品' 
+                  : '还没有人铸造春联NFT'
+              }
             </p>
             {searchTerm && (
               <Button 
@@ -323,7 +367,7 @@ export default function GalleryPage() {
             <div className={`grid gap-6 mb-8 ${
               viewMode === 'grid' 
                 ? 'sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
-                : 'grid-cols-1 max-w-4xl mx-auto'
+                : 'grid-cols-1'
             }`}>
               {nftListData?.data.map((nft) => {
                 // 添加调试日志
@@ -368,6 +412,7 @@ export default function GalleryPage() {
         onClose={closeImageViewer}
         nft={selectedNFT}
         imageUrl={selectedImageUrl}
+        onTransferClick={handleTransferClick}
       />
 
       {/* 转移弹窗 */}
