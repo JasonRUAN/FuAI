@@ -272,10 +272,10 @@ export function NFTCard({ nft, viewMode, onImageClick, onTransferClick }: NFTCar
             </div>
           </div>
 
-          {/* 右侧信息和操作 - 固定宽度 */}
-          <div className="flex items-center gap-4 flex-shrink-0">
+          {/* 右侧信息和操作 - 固定总宽度 */}
+          <div className="flex items-center gap-4 w-[360px] flex-shrink-0">
             {/* 信息 */}
-            <div className="flex flex-col gap-2 w-[160px]">
+            <div className="flex flex-col gap-2 w-[160px] flex-shrink-0">
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="border-red-500/50 text-red-600 dark:text-red-400 flex-shrink-0">
                   #{nft.tokenId}
@@ -303,27 +303,29 @@ export function NFTCard({ nft, viewMode, onImageClick, onTransferClick }: NFTCar
               </div>
             </div>
 
-            {/* 操作按钮 */}
-            <div className="flex gap-2 flex-shrink-0">
+            {/* 操作按钮 - 固定宽度和位置 */}
+            <div className="flex gap-2 w-[180px] flex-shrink-0">
               <Button
                 size="sm"
                 variant="outline"
                 onClick={handleViewImage}
-                className="border-red-500/30 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
+                className="border-red-500/30 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 w-[84px]"
               >
                 <Eye className="h-4 w-4 mr-1" />
                 查看
               </Button>
-              {isOwner && (
+              {isOwner ? (
                 <Button
                   size="sm"
                   variant="outline"
                   onClick={handleGift}
-                  className="border-amber-500/30 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/30"
+                  className="border-amber-500/30 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/30 w-[84px]"
                 >
                   <Gift className="h-4 w-4 mr-1" />
                   赠送
                 </Button>
+              ) : (
+                <div className="w-[84px]" />
               )}
             </div>
           </div>
