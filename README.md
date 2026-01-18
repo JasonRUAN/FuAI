@@ -257,7 +257,7 @@ sequenceDiagram
     participant Backend as 🔧 后端
     participant IPFS as 📦 IPFS/Pinata
     participant Contract as 📜 智能合约
-    participant Blockchain as ⛓️ Monad
+    participant Blockchain as ⛓️ 区块链
     
     User->>UI: 点击"铸造 NFT"
     UI->>Wallet: 检查钱包连接
