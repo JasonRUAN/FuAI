@@ -212,7 +212,7 @@ export default function GalleryPage() {
               🏮
             </span>
             <h1 className="text-4xl font-bold bg-gradient-to-r from-red-500 via-amber-500 to-red-500 bg-clip-text text-transparent bg-[length:200%_auto] animate-shimmer">
-              福联NFT画廊
+              福NFT画廊
             </h1>
             <span
               className="text-3xl animate-bounce"

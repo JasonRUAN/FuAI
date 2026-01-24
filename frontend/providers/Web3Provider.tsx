@@ -1,17 +1,37 @@
 "use client";
 
 import { WagmiProvider, createConfig, http } from "wagmi";
-import { monadTestnet } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ConnectKitProvider, getDefaultConfig } from "connectkit";
+import { defineChain } from "viem";
+
+export const hashkeyChain = defineChain({
+    id: 133,
+    name: "HashKey Chain Testnet",
+    nativeCurrency: {
+        decimals: 18,
+        name: "HSK",
+        symbol: "HSK",
+    },
+    rpcUrls: {
+        default: { http: ["https://testnet.hsk.xyz"] },
+    },
+    blockExplorers: {
+        default: {
+            name: "testnet-explorer",
+            url: "https://testnet-explorer.hsk.xyz",
+        },
+    },
+    testnet: true,
+});
 
 const config = createConfig(
     getDefaultConfig({
         // Your dApps chains
-        chains: [monadTestnet],
+        chains: [hashkeyChain],
         transports: {
             // RPC URL for each chain
-            [monadTestnet.id]: http(`https://testnet-rpc.monad.xyz/`),
+            [hashkeyChain.id]: http(`https://testnet.hsk.xyz`),
         },
 
         // Required API Keys

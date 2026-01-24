@@ -35,7 +35,7 @@ export function Header() {
           </div>
           <div className="flex items-center gap-2">
             <span className="text-4xl font-bold text-shimmer tracking-wide">FuAI</span>
-            <span className="text-2xl font-bold text-yellow-200 tracking-wider">(福联AI)</span>
+            <span className="text-2xl font-bold text-yellow-200 tracking-wider">(福AI)</span>
           </div>
           {/* 装饰灯笼 */}
           <div className="hidden lg:flex items-center gap-1 ml-2">

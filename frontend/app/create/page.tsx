@@ -1270,7 +1270,7 @@ export default function CreatePage() {
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => {
-                                    const explorerUrl = `https://testnet.monadvision.com/tx/${mintedNFT.txHash}`;
+                                    const explorerUrl = `https://testnet-explorer.hsk.xyz/tx/${mintedNFT.txHash}`;
                                     window.open(explorerUrl, '_blank');
                                   }}
                                   className="h-8 px-2 text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/50"
