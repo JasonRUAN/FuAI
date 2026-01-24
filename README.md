@@ -1,4 +1,4 @@
-# 🎊 FuAI（福联 AI）
+# 🎊 FuAI（福 AI）
 
 <div align="center">
 
@@ -734,6 +734,6 @@ mindmap
 
 Made with ❤️ by FuAI Team
 
-[⬆️ 回到顶部](#-FuAI福联-ai)
+[⬆️ 回到顶部](#-FuAI福-ai)
 
 </div>
